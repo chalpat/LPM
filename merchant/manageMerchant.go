@@ -236,6 +236,68 @@ func (t *ManageMerchant) getCustomersByMerchantID(stub shim.ChaincodeStubInterfa
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
+// getMerchantByID - get Merchant details for a specific ID from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getMerchantByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var merchantId string
+	var err error
+	fmt.Println("start getMerchantByID")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	merchantId = args[0]
+	valAsbytes, err := stub.GetState(merchantId)									//get the merchantId from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ merchantId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Println("end getMerchantByID")
+	return valAsbytes, nil													//send it onward
+}
+// ============================================================================================================================
+//  getAllMerchants- get details of all Merchants from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, errResp string
+	var merchantIndex []string
+	var err error
+	fmt.Println("start getAllMerchants")
+		
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)								//un stringify it aka JSON.parse()
+	jsonResp = "{"
+	for i,val := range merchantIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for all Merchant")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+		if i < len(merchantIndex)-1 {
+			jsonResp = jsonResp + ","
+		}
+	}
+	jsonResp = jsonResp + "}"
+	fmt.Println("end getAllMerchants")
+	return []byte(jsonResp), nil			//send it onward
+}
+// ============================================================================================================================
 // Delete - remove a merchant from chain
 // ============================================================================================================================
 func (t *ManageMerchant) deleteMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -451,66 +513,4 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 
 	fmt.Println("end createMerchant")
 	return nil, nil
-}
-// ============================================================================================================================
-// getMerchantByID - get Merchant details for a specific ID from chaincode state
-// ============================================================================================================================
-func (t *ManageMerchant) getMerchantByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var merchantId string
-	var err error
-	fmt.Println("start getMerchantByID")
-	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
-		err = stub.SetEvent("errEvent", []byte(errMsg))
-		if err != nil {
-			return nil, err
-		} 
-		return nil, nil
-	}
-	// set merchantId
-	merchantId = args[0]
-	valAsbytes, err := stub.GetState(merchantId)									//get the merchantId from chaincode state
-	if err != nil {
-		errMsg := "{ \"message\" : \""+ merchantId + " not Found.\", \"code\" : \"503\"}"
-		err = stub.SetEvent("errEvent", []byte(errMsg))
-		if err != nil {
-			return nil, err
-		} 
-		return nil, nil
-	}
-	fmt.Println("end getMerchantByID")
-	return valAsbytes, nil													//send it onward
-}
-// ============================================================================================================================
-//  getAllMerchants- get details of all Merchants from chaincode state
-// ============================================================================================================================
-func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var jsonResp, errResp string
-	var merchantIndex []string
-	var err error
-	fmt.Println("start getAllMerchants")
-		
-	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
-	if err != nil {
-		return nil, errors.New("Failed to get Merchant index")
-	}
-	json.Unmarshal(merchantAsBytes, &merchantIndex)								//un stringify it aka JSON.parse()
-	jsonResp = "{"
-	for i,val := range merchantIndex{
-		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for all Merchant")
-		valueAsBytes, err := stub.GetState(val)
-		if err != nil {
-			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
-			return nil, errors.New(errResp)
-		}
-		fmt.Print("valueAsBytes : ")
-		fmt.Println(valueAsBytes)
-		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-		if i < len(merchantIndex)-1 {
-			jsonResp = jsonResp + ","
-		}
-	}
-	jsonResp = jsonResp + "}"
-	fmt.Println("end getAllMerchants")
-	return []byte(jsonResp), nil			//send it onward
 }
