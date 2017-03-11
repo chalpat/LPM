@@ -403,8 +403,8 @@ func (t *ManageMerchant) updateCustomer(stub shim.ChaincodeStubInterface, args [
 // ============================================================================================================================
 func (t *ManageMerchant) createCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 12 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 12\", \"code\" : \"503\"}"
+	if len(args) != 8 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err

@@ -172,16 +172,9 @@ func (t *ManageOwner) getMerchantByID(stub shim.ChaincodeStubInterface, args []s
 func (t *ManageOwner) getAllMerchants(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var jsonResp, errResp string
 	var merchantIndex []string
-	fmt.Println("start getAllMerchants")
 	var err error
-	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting \" \" as an argument\", \"code\" : \"503\"}"
-		err = stub.SetEvent("errEvent", []byte(errMsg))
-		if err != nil {
-			return nil, err
-		} 
-		return nil, nil
-	}
+	fmt.Println("start getAllMerchants")
+		
 	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant index")
@@ -207,7 +200,7 @@ func (t *ManageOwner) getAllMerchants(stub shim.ChaincodeStubInterface, args []s
 	return []byte(jsonResp), nil			//send it onward
 }
 // ============================================================================================================================
-// Delete - remove a Merchant from chain
+// Delete - remove a merchant from chain
 // ============================================================================================================================
 func (t *ManageOwner) deleteMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
@@ -267,13 +260,13 @@ func (t *ManageOwner) deleteMerchant(stub shim.ChaincodeStubInterface, args []st
 	return nil, nil
 }
 // ============================================================================================================================
-// Write - update Merchant into chaincode state
+// Write - update merchant into chaincode state
 // ============================================================================================================================
 func (t *ManageOwner) updateMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	fmt.Println("Updating Merchant")
-	if len(args) != 12 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 12\", \"code\" : \"503\"}"
+	if len(args) != 8 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -342,8 +335,8 @@ func (t *ManageOwner) updateMerchant(stub shim.ChaincodeStubInterface, args []st
 // ============================================================================================================================
 func (t *ManageOwner) createMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 12 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 12\", \"code\" : \"503\"}"
+	if len(args) != 8 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
