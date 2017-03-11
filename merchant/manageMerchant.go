@@ -33,6 +33,7 @@ type ManageMerchant struct {
 
 var CustomerIndexStr = "_Customerindex"				// name for the key/value that will store a list of all known Customer
 var TransactionIndexStr = "_Transactionindex"		// name for the key/value that will store a list of all known Transaction
+var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will store a list of all known Merchants
 
 type Customer struct{							// Attributes of a Customer 
 	CustomerID string `json:"customerId"`					
@@ -54,6 +55,17 @@ type Transaction struct{							// Attributes of a Transaction
 	Credit string `json:"credit"`
 	Debit string `json:"debit"`
 	CustomerID string `json:"customerId"`
+}
+
+type Merchant struct{							// Attributes of a Merchant
+	MerchantID string `json:"merchantId"`					
+	MerchantName string `json:"merchantName"`
+	MerchantLogo string `json:"merchantLogo"`
+	MerchantIndustry string `json:"merchantIndustry"`					
+	PointsPerDollarSpent string `json:"pointsPerDollarSpent"`
+	MerchantCurrency string `json:"merchantCurrency"`
+	ExchangeRate string `json:"exchangeRate"`
+	MerchantCU_date string `json:"merchantCU_date"`
 }
 
 // ============================================================================================================================
@@ -120,12 +132,12 @@ func (t *ManageMerchant) Invoke(stub shim.ChaincodeStubInterface, function strin
 	// Handle different functions
 	if function == "init" {													//initialize the chaincode state, used as reset
 		return t.Init(stub, "init", args)
-	} else if function == "createCustomer" {											//create a new Customer
-		return t.createCustomer(stub, args)
-	}else if function == "deleteCustomer" {									// delete a Customer
-		return t.deleteCustomer(stub, args)
-	}else if function == "updateCustomer" {									//update a Customer
-		return t.updateCustomer(stub, args)
+	}else if function == "createMerchant" {											//create a new Merchant
+		return t.createMerchant(stub, args)
+	}else if function == "deleteMerchant" {									// delete a Merchant
+		return t.deleteMerchant(stub, args)
+	}else if function == "updateMerchant" {									//update a Merchant
+		return t.updateMerchant(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)
 	errMsg := "{ \"message\" : \"Received unknown function invocation\", \"code\" : \"503\"}"
@@ -144,6 +156,10 @@ func (t *ManageMerchant) Query(stub shim.ChaincodeStubInterface, function string
 	// Handle different functions
 	if function == "getCustomersByMerchantID" {													//Read a Customer by transId
 		return t.getCustomersByMerchantID(stub, args)
+	}else if function == "getMerchantByID" {													//Read all Merchants
+		return t.getMerchantByID(stub, args)
+	}else if function == "getAllMerchants" {													//Read all Merchants
+		return t.getAllMerchants(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)						//error
 	errMsg := "{ \"message\" : \"Received unknown function query\", \"code\" : \"503\"}"
@@ -218,23 +234,22 @@ func (t *ManageMerchant) getCustomersByMerchantID(stub shim.ChaincodeStubInterfa
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getCustomersByMerchantID")
 	return []byte(jsonResp), nil											//send it onward
-
 }
 // ============================================================================================================================
-// Delete - remove a Customer from chain
+// Delete - remove a merchant from chain
 // ============================================================================================================================
-func (t *ManageMerchant) deleteCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageMerchant) deleteMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' as an argument\", \"code\" : \"503\"}"
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
 		err := stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
 		} 
 		return nil, nil
 	}
-	// set customerId
-	customerId := args[0]
-	err := stub.DelState(customerId)						//remove the Customer from chaincode
+	// set merchantId
+	merchantId := args[0]
+	err := stub.DelState(merchantId)													//remove the Merchant from chaincode
 	if err != nil {
 		errMsg := "{ \"message\" : \"Failed to delete state\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
@@ -244,93 +259,81 @@ func (t *ManageMerchant) deleteCustomer(stub shim.ChaincodeStubInterface, args [
 		return nil, nil
 	}
 
-	//get the Customer index
-	customerAsBytes, err := stub.GetState(CustomerIndexStr)
+	//get the Merchant index
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
 	if err != nil {
-		errMsg := "{ \"message\" : \"Failed to get Customer index\", \"code\" : \"503\"}"
+		errMsg := "{ \"message\" : \"Failed to get Merchant index\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
 		} 
 		return nil, nil
 	}
-	var customerIndex []string
-	json.Unmarshal(customerAsBytes, &customerIndex)								//un stringify it aka JSON.parse()
+	var merchantIndex []string
+	json.Unmarshal(merchantAsBytes, &merchantIndex)								//un stringify it aka JSON.parse()
 	//remove marble from index
-	for i,val := range customerIndex{
-		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for " + customerId)
-		if val == customerId{															//find the correct Customer
-			fmt.Println("found Customer with matching customerId")
-			customerIndex = append(customerIndex[:i], customerIndex[i+1:]...)			//remove it
-			for x:= range customerIndex{											//debug prints...
-				fmt.Println(string(x) + " - " + customerIndex[x])
+	for i,val := range merchantIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for " + merchantId)
+		if val == merchantId{															//find the correct Merchant
+			fmt.Println("found Merchant with matching merchantId")
+			merchantIndex = append(merchantIndex[:i], merchantIndex[i+1:]...)			//remove it
+			for x:= range merchantIndex{											//debug prints...
+				fmt.Println(string(x) + " - " + merchantIndex[x])
 			}
 			break
 		}
 	}
-	jsonAsBytes, _ := json.Marshal(customerIndex)									//save new index
-	err = stub.PutState(CustomerIndexStr, jsonAsBytes)
+	jsonAsBytes, _ := json.Marshal(merchantIndex)									//save new index
+	err = stub.PutState(MerchantIndexStr, jsonAsBytes)
 
-	tosend := "{ \"customerID\" : \""+customerId+"\", \"message\" : \"Customer deleted succcessfully\", \"code\" : \"200\"}"
+	tosend := "{ \"merchantID\" : \""+merchantId+"\", \"message\" : \"Merchant deleted succcessfully\", \"code\" : \"200\"}"
 	err = stub.SetEvent("evtsender", []byte(tosend))
 	if err != nil {
 		return nil, err
 	} 
 
-	// TODO:: All transactions related to customer should be deleted.
-
-	fmt.Println("Customer deleted succcessfully")
+	fmt.Println("Merchant deleted succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
-// Write - update customer into chaincode state
+// Write - update merchant into chaincode state
 // ============================================================================================================================
-func (t *ManageMerchant) updateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	fmt.Println("Updating Customer")
-	if len(args) != 15 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 15\", \"code\" : \"503\"}"
+	fmt.Println("Updating Merchant")
+	if len(args) != 8 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
 		} 
 		return nil, nil
 	}
-	// set customerId
-	customerId := args[0]
-	customerAsBytes, err := stub.GetState(customerId)					//get the Customer for the specified customerId from chaincode state
+	// set merchantId
+	merchantId := args[0]
+	merchantAsBytes, err := stub.GetState(merchantId)									//get the Merchant for the specified merchant from chaincode state
 	if err != nil {
-		errMsg := "{ \"message\" : \"Failed to get state for " + customerId + "\", \"code\" : \"503\"}"
+		errMsg := "{ \"message\" : \"Failed to get state for " + merchantId + "\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
 		} 
 		return nil, nil
 	}
-	res := Customer{}
-	res_trans := Transaction{}
-	transactionId := args[8]
-	json.Unmarshal(customerAsBytes, &res)
-	if res.CustomerID == customerId{
-		fmt.Println("Customer found with customerId : " + customerId)
-		fmt.Println(res);
-		res.CustomerName = args[1]
-		res.WalletWorth = args[2]
-		res.MerchantIDs = args[3]
-		res.MerchantNames = args[4]
-		res.MerchantCurrencies = args[5]
-		res.MerchantsPointsCount = args[6]
-		res.MerchantsPointsWorth = args[7]
-		res_trans.TransactionID = transactionId
-		res_trans.TransactionDateTime = args[9]
-		res_trans.TransactionType = args[10]
-		res_trans.TransactionFrom = args[11]
-		res_trans.TransactionTo = args[12]
-		res_trans.Credit = args[13]
-		res_trans.Debit = args[14]
-		res_trans.CustomerID = customerId
+	res := Merchant{}
+	json.Unmarshal(merchantAsBytes, &res)
+	if res.MerchantID == merchantId{
+		fmt.Println("Merchant found with merchantId : " + merchantId)
+		//fmt.Println(res);
+		res.MerchantName = args[1]
+		res.MerchantLogo = args[2]
+		res.MerchantIndustry = args[3]
+		res.PointsPerDollarSpent = args[4]
+		res.MerchantCurrency = args[5]
+		res.ExchangeRate = args[6]
+		res.MerchantCU_date = args[7]
 	}else{
-		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
+		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -338,70 +341,35 @@ func (t *ManageMerchant) updateCustomer(stub shim.ChaincodeStubInterface, args [
 		return nil, nil
 	}
 	
-	//build the Customer json string manually
-	customer_json := 	`{`+
-		`"customerId": "` + res.CustomerID + `" , `+
-		`"customerName": "` + res.CustomerName + `" , `+
-		`"walletWorth": "` + res.WalletWorth + `" , `+
-		`"merchantIDs": "` + res.MerchantIDs + `" , `+ 
-		`"merchantNames": "` + res.MerchantNames + `" , `+ 
-		`"merchantCurrencies": "` + res.MerchantCurrencies + `" , `+ 
-		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
-		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
-	`}`
-	err = stub.PutState(customerId, []byte(customer_json))									//store Customer with id as key
+	//build the Merchant json string manually
+	order := 	`{`+
+		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantName": "` + res.MerchantName + `" , `+
+		`"merchantLogo": "` + res.MerchantLogo + `" , `+
+		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
+		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+ 
+		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+ 
+		`"exchangeRate": "` +  res.ExchangeRate + `" , `+ 
+		`"merchantCU_date": "` +  res.MerchantCU_date + `" `+ 
+		`}`
+	err = stub.PutState(merchantId, []byte(order))									//store Merchant with id as key
 	if err != nil {
 		return nil, err
 	}
 
-	//build the Transaction json string manually
-	transaction_json := `{`+
-		`"transactionId": "` + transactionId + `" , `+
-		`"transactionDateTime": "` + res_trans.TransactionDateTime + `" , `+
-		`"transactionType": "` + res_trans.TransactionType + `" , `+
-		`"transactionFrom": "` + res_trans.TransactionFrom + `" , `+ 
-		`"transactionTo": "` + res_trans.TransactionTo + `" , `+ 
-		`"credit": "` + res_trans.Credit + `" , `+ 
-		`"debit": "` + res_trans.Debit + `" , `+ 
-		`"customerId": "` +  res_trans.CustomerID + `" `+ 
-	`}`
-	err = stub.PutState(transactionId, []byte(transaction_json))									//store Transaction with id as key
-	if err != nil {
-		return nil, err
-	}
-
-	//get the Transaction index
-	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
-	if err != nil {
-		return nil, errors.New("Failed to get Transaction index")
-	}
-	var transactionIndex []string	
-	json.Unmarshal(transactionAsBytes, &transactionIndex)							//un stringify it aka JSON.parse()
-	
-	//append
-	transactionIndex = append(transactionIndex, transactionId)									//add Transaction transactionId to index list
-	
-	jsonAsBytes, _ := json.Marshal(transactionIndex)
-	fmt.Print("jsonAsBytes: ")
-	fmt.Println(jsonAsBytes)
-	err = stub.PutState(TransactionIndexStr, jsonAsBytes)						//store name of Transaction
-	if err != nil {
-		return nil, err
-	}
-
-	tosend := "{ \"customerID\" : \""+customerId+"\", \"message\" : \"Customer details updated succcessfully\", \"code\" : \"200\"}"
+	tosend := "{ \"merchantId\" : \""+merchantId+"\", \"message\" : \"Merchant details updated succcessfully\", \"code\" : \"200\"}"
 	err = stub.SetEvent("evtsender", []byte(tosend))
 	if err != nil {
 		return nil, err
 	} 
 
-	fmt.Println("Customer details updated succcessfully")
+	fmt.Println("Merchant details updated succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
-// create Customer - create a new Customer, store into chaincode state
+// create Merchant - create a new Merchant, store into chaincode state
 // ============================================================================================================================
-func (t *ManageMerchant) createCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	if len(args) != 8 {
 		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
@@ -411,74 +379,138 @@ func (t *ManageMerchant) createCustomer(stub shim.ChaincodeStubInterface, args [
 		} 
 		return nil, nil
 	}
-	fmt.Println("start createCustomer")
-	customerId := args[0]
-	customerName := args[1]
-	walletWorth := args[2]
-	merchantIDs := args[3]
-	merchantNames := args[4]
-	merchantCurrencies := args[5]
-	merchantsPointsCount := args[6]
-	merchantsPointsWorth := args[7]
-	
-	customerAsBytes, err := stub.GetState(customerId)
+	fmt.Println("start createMerchant")
+	merchantID := args[0]
+	merchantName := args[1]
+	merchantLogo := args[2]
+	merchantIndustry := args[3]
+	pointsPerDollarSpent := args[4]
+	merchantCurrency := args[5]
+	exchangeRate := args[6]
+	merchantCU_date := args[7]
+	merchantAsBytes, err := stub.GetState(merchantID)
 	if err != nil {
-		return nil, errors.New("Failed to get Customer customerID")
+		return nil, errors.New("Failed to get Merchant merchantID")
 	}
-	res := Customer{}
-	json.Unmarshal(customerAsBytes, &res)
-	if res.CustomerID == customerId{
-		errMsg := "{ \"message\" : \"This Customer arleady exists\", \"code\" : \"503\"}"
+	res := Merchant{}
+	json.Unmarshal(merchantAsBytes, &res)
+	fmt.Print("res: ")
+	fmt.Println(res)
+	if res.MerchantID == merchantID{
+		fmt.Println("This Merchant arleady exists: " + merchantID)
+		fmt.Println(res);
+		errMsg := "{ \"message\" : \"This Merchant arleady exists\", \"code\" : \"503\"}"
 		err := stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
 		} 
-		return nil, nil				//all stop a Customer by this name exists
+		return nil, nil				//all stop a Merchant by this name exists
 	}
-	
-	//build the Customer json string manually
-	customer_json := 	`{`+
-		`"customerId": "` + customerId + `" , `+
-		`"customerName": "` + customerName + `" , `+
-		`"walletWorth": "` + walletWorth + `" , `+
-		`"merchantIDs": "` + merchantIDs + `" , `+ 
-		`"merchantNames": "` + merchantNames + `" , `+ 
-		`"merchantCurrencies": "` + merchantCurrencies + `" , `+ 
-		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
-		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
+	//build the Merchant json string manually
+	merchant_json := 	`{`+
+		`"merchantId": "` + merchantID + `" , `+
+		`"merchantName": "` + merchantName + `" , `+
+		`"merchantLogo": "` + merchantLogo + `" , `+
+		`"merchantIndustry": "` + merchantIndustry + `" , `+ 
+		`"pointsPerDollarSpent": "` + pointsPerDollarSpent + `" , `+ 
+		`"merchantCurrency": "` + merchantCurrency + `" , `+ 
+		`"exchangeRate": "` + exchangeRate + `" , `+ 
+		`"merchantCU_date": "` + merchantCU_date + `" `+ 
 	`}`
-	//fmt.Println("customer_json: " + customer_json)
-	fmt.Print("customer_json in bytes array: ")
-	fmt.Println([]byte(customer_json))
-	err = stub.PutState(customerId, []byte(customer_json))									//store Customer with customerId as key
+	fmt.Println("merchant_json: " + merchant_json)
+	fmt.Print("merchant_json in bytes array: ")
+	fmt.Println([]byte(merchant_json))
+	err = stub.PutState(merchantID, []byte(merchant_json))									//store Merchant with merchantId as key
 	if err != nil {
 		return nil, err
 	}
-	//get the Customer index
-	customerIndexAsBytes, err := stub.GetState(CustomerIndexStr)
+	//get the Merchant index
+	merchantIndexAsBytes, err := stub.GetState(MerchantIndexStr)
 	if err != nil {
-		return nil, errors.New("Failed to get Customer index")
+		return nil, errors.New("Failed to get Merchant index")
 	}
-	var customerIndex []string	
-	json.Unmarshal(customerIndexAsBytes, &customerIndex)							//un stringify it aka JSON.parse()
+	var merchantIndex []string
+	json.Unmarshal(merchantIndexAsBytes, &merchantIndex)							//un stringify it aka JSON.parse()
 	
 	//append
-	customerIndex = append(customerIndex, customerId)									//add Customer customerID to index list
-	
-	jsonAsBytes, _ := json.Marshal(customerIndex)
-	//fmt.Print("jsonAsBytes: ")
-	//fmt.Println(jsonAsBytes)
-	err = stub.PutState(CustomerIndexStr, jsonAsBytes)						//store name of Customer
+	merchantIndex = append(merchantIndex, merchantID)									//add Merchant merchantID to index list
+	fmt.Println("! Merchant index after appending merchantID: ", merchantIndex)
+	jsonAsBytes, _ := json.Marshal(merchantIndex)
+	fmt.Print("jsonAsBytes: ")
+	fmt.Println(jsonAsBytes)
+	err = stub.PutState(MerchantIndexStr, jsonAsBytes)						//store name of Merchant
 	if err != nil {
 		return nil, err
 	}
 
-	tosend := "{ \"customerID\" : \""+customerId+"\", \"message\" : \"Customer created succcessfully\", \"code\" : \"200\"}"
+	tosend := "{ \"merchantID\" : \""+merchantID+"\", \"message\" : \"Merchant created succcessfully\", \"code\" : \"200\"}"
 	err = stub.SetEvent("evtsender", []byte(tosend))
 	if err != nil {
 		return nil, err
 	} 
 
-	fmt.Println("end createCustomer")
+	fmt.Println("end createMerchant")
 	return nil, nil
+}
+// ============================================================================================================================
+// getMerchantByID - get Merchant details for a specific ID from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getMerchantByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var merchantId string
+	var err error
+	fmt.Println("start getMerchantByID")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	merchantId = args[0]
+	valAsbytes, err := stub.GetState(merchantId)									//get the merchantId from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ merchantId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Println("end getMerchantByID")
+	return valAsbytes, nil													//send it onward
+}
+// ============================================================================================================================
+//  getAllMerchants- get details of all Merchants from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, errResp string
+	var merchantIndex []string
+	var err error
+	fmt.Println("start getAllMerchants")
+		
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)								//un stringify it aka JSON.parse()
+	jsonResp = "{"
+	for i,val := range merchantIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for all Merchant")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+		if i < len(merchantIndex)-1 {
+			jsonResp = jsonResp + ","
+		}
+	}
+	jsonResp = jsonResp + "}"
+	fmt.Println("end getAllMerchants")
+	return []byte(jsonResp), nil			//send it onward
 }
