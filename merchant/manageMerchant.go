@@ -124,7 +124,7 @@ func (t *ManageMerchant) Invoke(stub shim.ChaincodeStubInterface, function strin
 		return t.createCustomer(stub, args)
 	}else if function == "deleteCustomer" {									// delete a Customer
 		return t.deleteCustomer(stub, args)
-	}else if function == "update_customer" {									//update a Customer
+	}else if function == "updateCustomer" {									//update a Customer
 		return t.updateCustomer(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)
