@@ -171,6 +171,7 @@ func (t *ManageCustomer) getCustomerByID(stub shim.ChaincodeStubInterface, args 
 	}
 	// set customerId
 	customerId = args[0]
+	fmt.Print("customerId in getCustomerByID : "+customerId)
 	valAsbytes, err := stub.GetState(customerId)									//get the customerId from chaincode state
 	if err != nil {
 		errMsg := "{ \"message\" : \""+ customerId + " not Found.\", \"code\" : \"503\"}"
@@ -478,7 +479,7 @@ func (t *ManageCustomer) createCustomer(stub shim.ChaincodeStubInterface, args [
 		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
 	`}`
-	//fmt.Println("customer_json: " + customer_json)
+	fmt.Println("customer_json: " + customer_json)
 	fmt.Print("customer_json in bytes array: ")
 	fmt.Println([]byte(customer_json))
 	err = stub.PutState(customerId, []byte(customer_json))									//store Customer with customerId as key
@@ -497,8 +498,8 @@ func (t *ManageCustomer) createCustomer(stub shim.ChaincodeStubInterface, args [
 	customerIndex = append(customerIndex, customerId)									//add Customer customerID to index list
 	
 	jsonAsBytes, _ := json.Marshal(customerIndex)
-	//fmt.Print("jsonAsBytes: ")
-	//fmt.Println(jsonAsBytes)
+	fmt.Print("jsonAsBytes: ")
+	fmt.Println(jsonAsBytes)
 	err = stub.PutState(CustomerIndexStr, jsonAsBytes)						//store name of Customer
 	if err != nil {
 		return nil, err
