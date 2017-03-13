@@ -159,6 +159,8 @@ func (t *ManageMerchant) Query(stub shim.ChaincodeStubInterface, function string
 		return t.getCustomersByMerchantID(stub, args)
 	}else if function == "getMerchantByID" {													//Read all Merchants
 		return t.getMerchantByID(stub, args)
+	}else if function == "getMerchantsByIndustry" {													//Read all Merchants
+		return t.getMerchantsByIndustry(stub, args)
 	}else if function == "getAllMerchants" {													//Read all Merchants
 		return t.getAllMerchants(stub, args)
 	}
@@ -264,6 +266,72 @@ func (t *ManageMerchant) getMerchantByID(stub shim.ChaincodeStubInterface, args 
 	}
 	fmt.Println("end getMerchantByID")
 	return valAsbytes, nil													//send it onward
+}
+// ============================================================================================================================
+// getMerchantsByIndustry - get Merchants for a given Industry from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getMerchantsByIndustry(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, industryName, errResp string
+	var err error
+	var merchantIndex []string
+	var valIndex Merchant
+	fmt.Println("start getMerchantsByIndustry")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'industryName' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	industryName = args[0]
+
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index string")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)			//un stringify it aka JSON.parse()
+	fmt.Print("merchantIndex : ")
+	fmt.Println(merchantIndex)
+	
+	jsonResp = "{"
+	for i,val := range merchantIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getMerchantsByIndustry")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		json.Unmarshal(valueAsBytes, &valIndex)
+		fmt.Print("valIndex: ")
+		fmt.Print(valIndex)
+		if valIndex.MerchantIndustry == industryName{
+			fmt.Println("Merchant found")
+			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+			fmt.Println("jsonResp inside if")
+			fmt.Println(jsonResp)
+			if i < len(merchantIndex)-1 {
+				jsonResp = jsonResp + ","
+			}
+		} else{
+			errMsg := "{ \"message\" : \""+ industryName+ " Not Found.\", \"code\" : \"503\"}"
+			err = stub.SetEvent("errEvent", []byte(errMsg))
+			if err != nil {
+				return nil, err
+			} 
+			return nil, nil
+		}
+		
+	}
+	jsonResp = jsonResp + "}"
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
+	fmt.Println("end getMerchantsByIndustry")
+	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
 //  getAllMerchants- get details of all Merchants from chaincode state
