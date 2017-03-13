@@ -37,6 +37,7 @@ var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will st
 
 type Customer struct{							// Attributes of a Customer 
 	CustomerID string `json:"customerId"`					
+	UserName string `json:"userName"`
 	CustomerName string `json:"customerName"`
 	WalletWorth string `json:"walletWorth"`
 	MerchantIDs string `json:"merchantIDs"`
@@ -59,8 +60,8 @@ type Transaction struct{							// Attributes of a Transaction
 
 type Merchant struct{							// Attributes of a Merchant
 	MerchantID string `json:"merchantId"`					
+	MerchantUserName string `json:"merchantUserName"`
 	MerchantName string `json:"merchantName"`
-	MerchantLogo string `json:"merchantLogo"`
 	MerchantIndustry string `json:"merchantIndustry"`					
 	PointsPerDollarSpent string `json:"pointsPerDollarSpent"`
 	MerchantCurrency string `json:"merchantCurrency"`
@@ -294,6 +295,9 @@ func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args 
 		}
 	}
 	jsonResp = jsonResp + "}"
+	fmt.Println("jsonResp in getAllMerchants::")
+	fmt.Println(jsonResp)
+
 	fmt.Println("end getAllMerchants")
 	return []byte(jsonResp), nil			//send it onward
 }
@@ -387,8 +391,8 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 	if res.MerchantID == merchantId{
 		fmt.Println("Merchant found with merchantId : " + merchantId)
 		//fmt.Println(res);
-		res.MerchantName = args[1]
-		res.MerchantLogo = args[2]
+		res.MerchantUserName = args[1]
+		res.MerchantName = args[2]
 		res.MerchantIndustry = args[3]
 		res.PointsPerDollarSpent = args[4]
 		res.MerchantCurrency = args[5]
@@ -406,8 +410,8 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 	//build the Merchant json string manually
 	order := 	`{`+
 		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
-		`"merchantLogo": "` + res.MerchantLogo + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
 		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+ 
 		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+ 
@@ -443,8 +447,8 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 	}
 	fmt.Println("start createMerchant")
 	merchantID := args[0]
-	merchantName := args[1]
-	merchantLogo := args[2]
+	merchantUserName := args[1]
+	merchantName := args[2]
 	merchantIndustry := args[3]
 	pointsPerDollarSpent := args[4]
 	merchantCurrency := args[5]
@@ -471,8 +475,8 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 	//build the Merchant json string manually
 	merchant_json := 	`{`+
 		`"merchantId": "` + merchantID + `" , `+
+		`"merchantUserName": "` + merchantUserName + `" , `+
 		`"merchantName": "` + merchantName + `" , `+
-		`"merchantLogo": "` + merchantLogo + `" , `+
 		`"merchantIndustry": "` + merchantIndustry + `" , `+ 
 		`"pointsPerDollarSpent": "` + pointsPerDollarSpent + `" , `+ 
 		`"merchantCurrency": "` + merchantCurrency + `" , `+ 
