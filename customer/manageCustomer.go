@@ -254,6 +254,42 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
+//  getAllCustomers- get details of all Merchants from chaincode state
+// ============================================================================================================================
+func (t *ManageCustomer) getAllCustomers(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, errResp string
+	var customerIndex []string
+	var err error
+	fmt.Println("start getAllCustomers")
+		
+	customerAsBytes, err := stub.GetState(CustomerIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer index")
+	}
+	json.Unmarshal(customerAsBytes, &customerIndex)			//un stringify it aka JSON.parse()
+	jsonResp = "{"
+	for i,val := range customerIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for all Customer")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+		if i < len(customerIndex)-1 {
+			jsonResp = jsonResp + ","
+		}
+	}
+	jsonResp = jsonResp + "}"
+	fmt.Println("jsonResp in getAllCustomers::")
+	fmt.Println(jsonResp)
+
+	fmt.Println("end getAllCustomers")
+	return []byte(jsonResp), nil			//send it onward
+}
+// ============================================================================================================================
 // Delete - remove a Customer and all his transactions from chain
 // ============================================================================================================================
 func (t *ManageCustomer) deleteCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
