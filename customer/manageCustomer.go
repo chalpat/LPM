@@ -254,7 +254,7 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
-// Delete - remove a Customer from chain
+// Delete - remove a Customer and all his transactions from chain
 // ============================================================================================================================
 func (t *ManageCustomer) deleteCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 {
