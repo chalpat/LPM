@@ -303,8 +303,8 @@ func (t *ManageMerchant) getMerchantsByIndustry(stub shim.ChaincodeStubInterface
 			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
 			return nil, errors.New(errResp)
 		}
-		fmt.Print("valueAsBytes : ")
-		fmt.Println(valueAsBytes)
+		//fmt.Print("valueAsBytes : ")
+		//fmt.Println(valueAsBytes)
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
