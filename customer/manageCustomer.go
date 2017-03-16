@@ -357,8 +357,8 @@ func (t *ManageCustomer) deleteCustomer(stub shim.ChaincodeStubInterface, args [
 func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	fmt.Println("Updating Customer")
-	if len(args) != 16 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 16\", \"code\" : \"503\"}"
+	if len(args) != 11 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 11\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -378,26 +378,21 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 	}
 	res := Customer{}
 	res_trans := Transaction{}
-	transactionId := args[9]
+	transactionId := args[4]
 	json.Unmarshal(customerAsBytes, &res)
 	if res.CustomerID == customerId{
 		fmt.Println("Customer found with customerId : " + customerId)
 		fmt.Println(res);
-		res.CustomerName = args[1]
-		res.UserName = args[2]
-		res.WalletWorth = args[3]
-		res.MerchantIDs = args[4]
-		res.MerchantNames = args[5]
-		res.MerchantCurrencies = args[6]
-		res.MerchantsPointsCount = args[7]
-		res.MerchantsPointsWorth = args[8]
+		res.WalletWorth = args[1]
+		res.MerchantsPointsCount = args[2]
+		res.MerchantsPointsWorth = args[3]
 		res_trans.TransactionID = transactionId
-		res_trans.TransactionDateTime = args[10]
-		res_trans.TransactionType = args[11]
-		res_trans.TransactionFrom = args[12]
-		res_trans.TransactionTo = args[13]
-		res_trans.Credit = args[14]
-		res_trans.Debit = args[15]
+		res_trans.TransactionDateTime = args[5]
+		res_trans.TransactionType = args[6]
+		res_trans.TransactionFrom = args[7]
+		res_trans.TransactionTo = args[8]
+		res_trans.Credit = args[9]
+		res_trans.Debit = args[10]
 		res_trans.CustomerID = customerId
 	}else{
 		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
@@ -411,12 +406,7 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 	//build the Customer json string manually
 	customer_json := 	`{`+
 		`"customerId": "` + res.CustomerID + `" , `+
-		`"userName": "` + res.UserName + `" , `+
-		`"customerName": "` + res.CustomerName + `" , `+
 		`"walletWorth": "` + res.WalletWorth + `" , `+
-		`"merchantIDs": "` + res.MerchantIDs + `" , `+ 
-		`"merchantNames": "` + res.MerchantNames + `" , `+ 
-		`"merchantCurrencies": "` + res.MerchantCurrencies + `" , `+ 
 		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
 	`}`
@@ -453,7 +443,7 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 	transactionIndex = append(transactionIndex, transactionId)									//add Transaction transactionId to index list
 	
 	jsonAsBytes, _ := json.Marshal(transactionIndex)
-	fmt.Print("jsonAsBytes: ")
+	fmt.Print("update customer jsonAsBytes: ")
 	fmt.Println(jsonAsBytes)
 	err = stub.PutState(TransactionIndexStr, jsonAsBytes)						//store name of Transaction
 	if err != nil {
