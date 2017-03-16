@@ -159,6 +159,8 @@ func (t *ManageMerchant) Query(stub shim.ChaincodeStubInterface, function string
 		return t.getCustomersByMerchantID(stub, args)
 	}else if function == "getMerchantByID" {													//Read all Merchants
 		return t.getMerchantByID(stub, args)
+	}else if function == "getMerchantDetailsByID" {													//Read all Merchants
+		return t.getMerchantDetailsByID(stub, args)
 	}else if function == "getMerchantsByIndustry" {													//Read all Merchants
 		return t.getMerchantsByIndustry(stub, args)
 	}else if function == "getAllMerchants" {													//Read all Merchants
@@ -265,6 +267,35 @@ func (t *ManageMerchant) getMerchantByID(stub shim.ChaincodeStubInterface, args 
 		return nil, nil
 	}
 	fmt.Println("end getMerchantByID")
+	return valAsbytes, nil													//send it onward
+}
+// ============================================================================================================================
+// getMerchantDetailsByID - get Merchant details for a specific ID from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getMerchantDetailsByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var merchantId string
+	var err error
+	fmt.Println("start getMerchantDetailsByID")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	merchantId = args[0]
+	valAsbytes, err := stub.GetState(merchantId)									//get the merchantId from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ merchantId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Println("end getMerchantDetailsByID")
 	return valAsbytes, nil													//send it onward
 }
 // ============================================================================================================================
