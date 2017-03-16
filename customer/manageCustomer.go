@@ -406,7 +406,12 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 	//build the Customer json string manually
 	customer_json := 	`{`+
 		`"customerId": "` + res.CustomerID + `" , `+
+		`"userName": "` + res.UserName + `" , `+
+		`"customerName": "` + res.CustomerName + `" , `+
 		`"walletWorth": "` + res.WalletWorth + `" , `+
+		`"merchantIDs": "` + res.MerchantIDs + `" , `+
+		`"merchantNames": "` + res.MerchantNames + `" , `+
+		`"merchantCurrencies": "` + res.MerchantCurrencies + `" , `+
 		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
 	`}`
