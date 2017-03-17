@@ -289,14 +289,7 @@ func (t *ManageMerchant) getMerchantByName(stub shim.ChaincodeStubInterface, arg
 			if i < len(merchantIndex)-1 {
 				jsonResp = jsonResp + ","
 			}
-		} else{
-			errMsg := "{ \"message\" : \""+ merchantName+ " Not Found.\", \"code\" : \"503\"}"
-			err = stub.SetEvent("errEvent", []byte(errMsg))
-			if err != nil {
-				return nil, err
-			} 
-			return nil, nil
-		}
+		} 
 		
 	}
 	jsonResp = jsonResp + "}"
