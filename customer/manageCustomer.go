@@ -236,15 +236,7 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 			if i < len(transactionIndex)-1 {
 				jsonResp = jsonResp + ","
 			}
-		} else{
-			errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
-			err = stub.SetEvent("errEvent", []byte(errMsg))
-			if err != nil {
-				return nil, err
-			} 
-			return nil, nil
-		}
-		
+		} 
 	}
 	jsonResp = jsonResp + "}"
 	fmt.Println("jsonResp : " + jsonResp)
@@ -377,12 +369,8 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 		return nil, nil
 	}
 	res := Customer{}
-	res_trans1 := Transaction{}
-	res_trans2 := Transaction{}
-
-	transactionId1 := args[4]
-	transactionId2 := args[11]
-
+	res_trans := Transaction{}
+ 	transactionId := args[4]
 	json.Unmarshal(customerAsBytes, &res)
 	if res.CustomerID == customerId{
 		fmt.Println("Customer found with customerId : " + customerId)
@@ -390,22 +378,14 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 		res.WalletWorth = args[1]
 		res.MerchantsPointsCount = args[2]
 		res.MerchantsPointsWorth = args[3]
-		res_trans1.TransactionID = transactionId1
-		res_trans1.TransactionDateTime = args[5]
-		res_trans1.TransactionType = args[6]
-		res_trans1.TransactionFrom = args[7]
-		res_trans1.TransactionTo = args[8]
-		res_trans1.Credit = args[9]
-		res_trans1.Debit = args[10]
-		res_trans1.CustomerID = customerId
-		res_trans2.TransactionID = transactionId1
-		res_trans2.TransactionDateTime = args[12]
-		res_trans2.TransactionType = args[6]
-		res_trans2.TransactionFrom = args[13]
-		res_trans2.TransactionTo = args[14]
-		res_trans2.Credit = args[15]
-		res_trans2.Debit = args[16]
-		res_trans2.CustomerID = customerId
+		res_trans.TransactionID = transactionId
+ 		res_trans.TransactionDateTime = args[5]
+ 		res_trans.TransactionType = args[6]
+ 		res_trans.TransactionFrom = args[7]
+ 		res_trans.TransactionTo = args[8]
+ 		res_trans.Credit = args[9]
+ 		res_trans.Debit = args[10]
+ 		res_trans.CustomerID = customerId
 	}else{
 		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
@@ -432,71 +412,37 @@ func (t *ManageCustomer) updateCustomer(stub shim.ChaincodeStubInterface, args [
 		return nil, err
 	}
 
-	// build the Transaction1 json string manually
-	transaction_json1 := `{`+
-		`"transactionId": "` + transactionId1 + `" , `+
-		`"transactionDateTime": "` + res_trans1.TransactionDateTime + `" , `+
-		`"transactionType": "` + res_trans1.TransactionType + `" , `+
-		`"transactionFrom": "` + res_trans1.TransactionFrom + `" , `+ 
-		`"transactionTo": "` + res_trans1.TransactionTo + `" , `+ 
-		`"credit": "` + res_trans1.Credit + `" , `+ 
-		`"debit": "` + res_trans1.Debit + `" , `+ 
-		`"customerId": "` +  res_trans1.CustomerID + `" `+ 
+	// build the Transaction json string manually
+	transaction_json := `{`+
+		`"transactionId": "` + transactionId + `" , `+
+		`"transactionDateTime": "` + res_trans.TransactionDateTime + `" , `+
+		`"transactionType": "` + res_trans.TransactionType + `" , `+
+		`"transactionFrom": "` + res_trans.TransactionFrom + `" , `+ 
+		`"transactionTo": "` + res_trans.TransactionTo + `" , `+ 
+		`"credit": "` + res_trans.Credit + `" , `+ 
+		`"debit": "` + res_trans.Debit + `" , `+ 
+		`"customerId": "` +  res_trans.CustomerID + `" `+ 
 	`}`
-	err = stub.PutState(transactionId1, []byte(transaction_json1))									//store Transaction with id as key
+	err = stub.PutState(transactionId, []byte(transaction_json))									//store Transaction with id as key
 	if err != nil {
 		return nil, err
 	}
 
 	//get the Transaction index
-	transactionAsBytes1, err := stub.GetState(TransactionIndexStr)
+	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Transaction index")
 	}
-	var transactionIndex1 []string	
-	json.Unmarshal(transactionAsBytes1, &transactionIndex1)							//un stringify it aka JSON.parse()
+	var transactionIndex []string	
+	json.Unmarshal(transactionAsBytes, &transactionIndex)							//un stringify it aka JSON.parse()
 	
 	//append
-	transactionIndex1 = append(transactionIndex1, transactionId1)									//add Transaction transactionId to index list
+	transactionIndex = append(transactionIndex, transactionId)									//add Transaction transactionId to index list
 	
-	jsonAsBytes1, _ := json.Marshal(transactionIndex1)
-	fmt.Print("update customer jsonAsBytes1: ")
-	fmt.Println(jsonAsBytes1)
-	err = stub.PutState(TransactionIndexStr, jsonAsBytes1)						//store name of Transaction
-	if err != nil {
-		return nil, err
-	}
-
-	// build the Transaction2 json string manually
-	transaction_json2 := `{`+
-		`"transactionId": "` + transactionId2 + `" , `+
-		`"transactionDateTime": "` + res_trans2.TransactionDateTime + `" , `+
-		`"transactionType": "` + res_trans2.TransactionType + `" , `+
-		`"transactionFrom": "` + res_trans2.TransactionFrom + `" , `+ 
-		`"transactionTo": "` + res_trans2.TransactionTo + `" , `+ 
-		`"credit": "` + res_trans2.Credit + `" , `+ 
-		`"debit": "` + res_trans2.Debit + `" , `+ 
-		`"customerId": "` +  res_trans2.CustomerID + `" `+ 
-	`}`
-	err = stub.PutState(transactionId2, []byte(transaction_json2))									//store Transaction with id as key
-	if err != nil {
-		return nil, err
-	}
-
-	//get the Transaction index
-	transactionAsBytes2, err := stub.GetState(TransactionIndexStr)
-	if err != nil {
-		return nil, errors.New("Failed to get Transaction index")
-	}
-	var transactionIndex2 []string	
-	json.Unmarshal(transactionAsBytes2, &transactionIndex2)							//un stringify it aka JSON.parse()
-	
-	//append
-	transactionIndex2 = append(transactionIndex2, transactionId2)									//add Transaction transactionId to index list
-	jsonAsBytes2, _ := json.Marshal(transactionIndex2)
+	jsonAsBytes, _ := json.Marshal(transactionIndex)
 	fmt.Print("update customer jsonAsBytes: ")
-	fmt.Println(jsonAsBytes2)
-	err = stub.PutState(TransactionIndexStr, jsonAsBytes2)						//store name of Transaction
+	fmt.Println(jsonAsBytes)
+	err = stub.PutState(TransactionIndexStr, jsonAsBytes)						//store name of Transaction
 	if err != nil {
 		return nil, err
 	}
