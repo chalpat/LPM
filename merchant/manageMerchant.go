@@ -285,9 +285,9 @@ func (t *ManageMerchant) getMerchantByName(stub shim.ChaincodeStubInterface, arg
 		} 
 	}
 	jsonResp = jsonResp + "}"
-	//fmt.Println("jsonResp : " + jsonResp)
-	//fmt.Print("jsonResp in bytes : ")
-	//fmt.Println([]byte(jsonResp))
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getMerchantByName")
 	return []byte(jsonResp), nil											//send it onward
 }
