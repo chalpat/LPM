@@ -279,9 +279,9 @@ func (t *ManageMerchant) getMerchantByName(stub shim.ChaincodeStubInterface, arg
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
-			if i < len(merchantIndex)-1 {
+			/*if i < len(merchantIndex)-1 {
 				jsonResp = jsonResp + ","
-			}
+			}*/
 		} 
 	}
 	jsonResp = jsonResp + "}"
