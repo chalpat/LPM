@@ -269,16 +269,16 @@ func (t *ManageMerchant) getMerchantByName(stub shim.ChaincodeStubInterface, arg
 			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
 			return nil, errors.New(errResp)
 		}
-		//fmt.Print("valueAsBytes : ")
-		//fmt.Println(valueAsBytes)
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
 		if valIndex.MerchantName == merchantName{
 			fmt.Println("Merchant found")
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-			//fmt.Println("jsonResp inside if")
-			//fmt.Println(jsonResp)
+			fmt.Println("jsonResp inside if")
+			fmt.Println(jsonResp)
 			if i < len(merchantIndex)-1 {
 				jsonResp = jsonResp + ","
 			}
