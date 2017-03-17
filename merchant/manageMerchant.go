@@ -156,6 +156,8 @@ func (t *ManageMerchant) Query(stub shim.ChaincodeStubInterface, function string
 	// Handle different functions
 	if function == "getCustomersByMerchantID" {													//Read a Customer by transId
 		return t.getCustomersByMerchantID(stub, args)
+	}else if function == "getMerchantByName" {													//Read all Merchants
+		return t.getMerchantByName(stub, args)
 	}else if function == "getMerchantByID" {													//Read all Merchants
 		return t.getMerchantByID(stub, args)
 	}else if function == "getMerchantDetailsByID" {													//Read all Merchants
@@ -237,6 +239,71 @@ func (t *ManageMerchant) getCustomersByMerchantID(stub shim.ChaincodeStubInterfa
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getCustomersByMerchantID")
+	return []byte(jsonResp), nil											//send it onward
+}
+// ============================================================================================================================
+//  getMerchantByName - get Merchant details by name from chaincode state
+// ============================================================================================================================
+func (t *ManageMerchant) getMerchantByName(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, merchantName, errResp string
+	var merchantIndex []string
+	var valIndex Merchant
+	fmt.Println("start getMerchantByName")
+	var err error
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchant's name
+	merchantName = args[0]
+	//fmt.Println("merchantName" + merchantName)
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index string")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)				//un stringify it aka JSON.parse()
+	fmt.Print("merchantIndex : ")
+	fmt.Println(merchantIndex)
+	jsonResp = "{"
+	for i,val := range merchantIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getMerchantByName")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		//fmt.Print("valueAsBytes : ")
+		//fmt.Println(valueAsBytes)
+		json.Unmarshal(valueAsBytes, &valIndex)
+		fmt.Print("valIndex: ")
+		fmt.Print(valIndex)
+		if valIndex.MerchantName == merchantName{
+			fmt.Println("Merchant found")
+			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+			//fmt.Println("jsonResp inside if")
+			//fmt.Println(jsonResp)
+			if i < len(merchantIndex)-1 {
+				jsonResp = jsonResp + ","
+			}
+		} else{
+			errMsg := "{ \"message\" : \""+ merchantName+ " Not Found.\", \"code\" : \"503\"}"
+			err = stub.SetEvent("errEvent", []byte(errMsg))
+			if err != nil {
+				return nil, err
+			} 
+			return nil, nil
+		}
+		
+	}
+	jsonResp = jsonResp + "}"
+	//fmt.Println("jsonResp : " + jsonResp)
+	//fmt.Print("jsonResp in bytes : ")
+	//fmt.Println([]byte(jsonResp))
+	fmt.Println("end getMerchantByName")
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
