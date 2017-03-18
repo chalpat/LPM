@@ -232,16 +232,13 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-		if valIndex.CustomerID == customerId{
-			fmt.Println("Customer found")
-			if valIndex.TransactionFrom == merchantName{
-				fmt.Println("Customer's merchant found")
-				jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-				fmt.Println("jsonResp inside if")
-				fmt.Println(jsonResp)
-				if i < len(transactionIndex)-1 {
-					jsonResp = jsonResp + ","
-				}
+		if valIndex.CustomerID == customerId && valIndex.TransactionFrom == merchantName{
+			fmt.Println("Customer's merchant found")
+			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+			fmt.Println("jsonResp inside if")
+			fmt.Println(jsonResp)
+			if i < len(transactionIndex)-1 {
+				jsonResp = jsonResp + ","
 			}
 		} 
 	}
