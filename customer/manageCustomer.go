@@ -188,18 +188,19 @@ func (t *ManageCustomer) getCustomerByID(stub shim.ChaincodeStubInterface, args 
 	return valAsbytes, nil													//send it onward
 }
 // ============================================================================================================================
-//  getActivityHistory - get Customer Transaction Activity details from chaincode state
+//  getActivityHistory - get Customer Transaction Activity details for a given merchant from chaincode state
 // ============================================================================================================================
 func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var jsonResp, errResp string
 	var transactionIndex []string
 	var valIndex Transaction
 	var customerId string
+	var merchantName string
 	var err error
 	fmt.Println("start getActivityHistory")
 	
-	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' as an argument\", \"code\" : \"503\"}"
+	if len(args) != 2 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' and 'merchantName' as arguments\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -209,6 +210,9 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 	// set customerId
 	customerId = args[0]
 	fmt.Println("customerId in getActivityHistory::" + customerId)
+	// set merchantName
+	merchantName = args[1]
+	fmt.Println("merchantName in getActivityHistory::" + merchantName)
 
 	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
 	if err != nil {
@@ -230,11 +234,14 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 		fmt.Print(valIndex)
 		if valIndex.CustomerID == customerId{
 			fmt.Println("Customer found")
-			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-			fmt.Println("jsonResp inside if")
-			fmt.Println(jsonResp)
-			if i < len(transactionIndex)-1 {
-				jsonResp = jsonResp + ","
+			if valIndex.TransactionFrom == merchantName{
+				fmt.Println("Customer's merchant found")
+				jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+				fmt.Println("jsonResp inside if")
+				fmt.Println(jsonResp)
+				if i < len(transactionIndex)-1 {
+					jsonResp = jsonResp + ","
+				}
 			}
 		} 
 	}
