@@ -245,12 +245,12 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 			fmt.Println(transactionIndex)
 			fmt.Println("length::")
 			fmt.Println(len(transactionIndex))
-			if i < len(transactionIndex)-1 {
-				fmt.Println("i::")
+			if i != len(transactionIndex)-1 {
+				fmt.Println("i in if if::")
 				fmt.Println(i)
+				jsonResp = jsonResp + ","
 				fmt.Println("jsonResp inside if if")
 				fmt.Println(jsonResp)
-				jsonResp = jsonResp + ",,"
 			}
 		} 
 	}
