@@ -293,11 +293,15 @@ func (t *ManageCustomer) getAllCustomers(stub shim.ChaincodeStubInterface, args 
 		fmt.Print("valueAsBytes : ")
 		fmt.Println(valueAsBytes)
 		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-		/*if i < len(customerIndex)-1 {
+		if i < len(customerIndex)-1 {
 			jsonResp = jsonResp + ","
-		}*/
+		}
 	}
 	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
 	fmt.Println("jsonResp in getAllCustomers::")
 	fmt.Println(jsonResp)
 

@@ -396,12 +396,16 @@ func (t *ManageMerchant) getMerchantsByIndustry(stub shim.ChaincodeStubInterface
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
-			/*if i < len(merchantIndex)-1 {
+			if i < len(merchantIndex)-1 {
 				jsonResp = jsonResp + ","
-			}*/
+			}
 		} 
 	}
 	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
 	fmt.Println("jsonResp : " + jsonResp)
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
@@ -433,11 +437,15 @@ func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args 
 		fmt.Print("valueAsBytes : ")
 		fmt.Println(valueAsBytes)
 		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-		/*if i < len(merchantIndex)-1 {
+		if i < len(merchantIndex)-1 {
 			jsonResp = jsonResp + ","
-		}*/
+		}
 	}
 	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
 	fmt.Println("jsonResp in getAllMerchants::")
 	fmt.Println(jsonResp)
 
