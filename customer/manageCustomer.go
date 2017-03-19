@@ -147,10 +147,12 @@ func (t *ManageCustomer) Query(stub shim.ChaincodeStubInterface, function string
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
-	if function == "getCustomerByID" {													//Read a Customer by transId
+	if function == "getCustomerByID" {													//Read a Customer by Id
 		return t.getCustomerByID(stub, args)
-	} else if function == "getActivityHistory" {													//Read a Customer by Buyer's name
+	} else if function == "getActivityHistory" {													//Read all transactions 
 		return t.getActivityHistory(stub, args)
+	}else if function == "getAllCustomers" {													//Read all Customers
+		return t.getAllCustomers(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)						//error
 	errMsg := "{ \"message\" : \"Received unknown function query\", \"code\" : \"503\"}"
