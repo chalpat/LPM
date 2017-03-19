@@ -223,9 +223,9 @@ func (t *ManageMerchant) getCustomersByMerchantID(stub shim.ChaincodeStubInterfa
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
-			if i < len(customerIndex)-1 {
+			/*if i < len(customerIndex)-1 {
 				jsonResp = jsonResp + ","
-			}
+			}*/
 		} 
 	}
 	jsonResp = jsonResp + "}"
@@ -433,9 +433,9 @@ func (t *ManageMerchant) getAllMerchants(stub shim.ChaincodeStubInterface, args 
 		fmt.Print("valueAsBytes : ")
 		fmt.Println(valueAsBytes)
 		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-		if i < len(merchantIndex)-1 {
+		/*if i < len(merchantIndex)-1 {
 			jsonResp = jsonResp + ","
-		}
+		}*/
 	}
 	jsonResp = jsonResp + "}"
 	fmt.Println("jsonResp in getAllMerchants::")

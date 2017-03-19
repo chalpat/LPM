@@ -241,9 +241,9 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
-			if i < len(transactionIndex)-1 {
+			/*if i < len(transactionIndex)-1 {
 				jsonResp = jsonResp + ","
-			}
+			}*/
 		} 
 	}
 	jsonResp = jsonResp + "}"
@@ -278,9 +278,9 @@ func (t *ManageCustomer) getAllCustomers(stub shim.ChaincodeStubInterface, args 
 		fmt.Print("valueAsBytes : ")
 		fmt.Println(valueAsBytes)
 		jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-		if i < len(customerIndex)-1 {
+		/*if i < len(customerIndex)-1 {
 			jsonResp = jsonResp + ","
-		}
+		}*/
 	}
 	jsonResp = jsonResp + "}"
 	fmt.Println("jsonResp in getAllCustomers::")
