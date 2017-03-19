@@ -62,7 +62,8 @@ type Merchant struct{							// Attributes of a Merchant
 	MerchantID string `json:"merchantId"`					
 	MerchantUserName string `json:"merchantUserName"`
 	MerchantName string `json:"merchantName"`
-	MerchantIndustry string `json:"merchantIndustry"`					
+	MerchantIndustry string `json:"merchantIndustry"`
+	IndustryColor string `json:"industryColor"`					
 	PointsPerDollarSpent string `json:"pointsPerDollarSpent"`
 	ExchangeRate string `json:"exchangeRate"`
 	MerchantCurrency string `json:"merchantCurrency"`
@@ -509,8 +510,8 @@ func (t *ManageMerchant) deleteMerchant(stub shim.ChaincodeStubInterface, args [
 func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	fmt.Println("Updating Merchant")
-	if len(args) != 8 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
+	if len(args) != 9 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 9\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -536,10 +537,11 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 		res.MerchantUserName = args[1]
 		res.MerchantName = args[2]
 		res.MerchantIndustry = args[3]
-		res.PointsPerDollarSpent = args[4]
-		res.ExchangeRate = args[5]
-		res.MerchantCurrency = args[6]
-		res.MerchantCU_date = args[7]
+		res.IndustryColor = args[4]
+		res.PointsPerDollarSpent = args[5]
+		res.ExchangeRate = args[6]
+		res.MerchantCurrency = args[7]
+		res.MerchantCU_date = args[8]
 	}else{
 		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
@@ -555,6 +557,7 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
+		`"industryColor": "` + res.IndustryColor + `" , `+
 		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+
 		`"exchangeRate": "` + res.ExchangeRate + `" , `+ 
 		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+
@@ -579,8 +582,8 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 // ============================================================================================================================
 func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 8 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 8\", \"code\" : \"503\"}"
+	if len(args) != 9 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 9\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -592,10 +595,11 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 	merchantUserName := args[1]
 	merchantName := args[2]
 	merchantIndustry := args[3]
-	pointsPerDollarSpent := args[4]
-	exchangeRate := args[5]
-	merchantCurrency := args[6]
-	merchantCU_date := args[7]
+	industryColor := args[4]
+	pointsPerDollarSpent := args[5]
+	exchangeRate := args[6]
+	merchantCurrency := args[7]
+	merchantCU_date := args[8]
 	merchantAsBytes, err := stub.GetState(merchantID)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant merchantID")
@@ -620,6 +624,7 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 		`"merchantUserName": "` + merchantUserName + `" , `+
 		`"merchantName": "` + merchantName + `" , `+
 		`"merchantIndustry": "` + merchantIndustry + `" , `+ 
+		`"industryColor": "` + industryColor + `" , `+
 		`"pointsPerDollarSpent": "` + pointsPerDollarSpent + `" , `+ 
 		`"exchangeRate": "` + exchangeRate + `" , `+ 
 		`"merchantCurrency": "` + merchantCurrency + `" , `+
