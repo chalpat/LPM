@@ -22,6 +22,7 @@ import (
 "fmt"
 "strconv"
 "encoding/json"
+"strings"
 
 "github.com/hyperledger/fabric/core/chaincode/shim"	
 )
@@ -245,8 +246,8 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 			fmt.Println(transactionIndex)
 			fmt.Println("length::")
 			fmt.Println(len(transactionIndex))
-			if i != len(transactionIndex)-1 {
-				fmt.Println("i in if if::")
+			if i < len(transactionIndex)-1 {
+				fmt.Println("i::")
 				fmt.Println(i)
 				jsonResp = jsonResp + ","
 				fmt.Println("jsonResp inside if if")
@@ -255,6 +256,10 @@ func (t *ManageCustomer) getActivityHistory(stub shim.ChaincodeStubInterface, ar
 		} 
 	}
 	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
 	fmt.Println("jsonResp : " + jsonResp)
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
