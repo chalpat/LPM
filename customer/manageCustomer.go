@@ -549,7 +549,7 @@ func (t *ManageCustomer) updateCustomerRedemption(stub shim.ChaincodeStubInterfa
  		res_trans1.Credit = args[9]
  		res_trans1.Debit = args[10]
  		res_trans1.CustomerID = customerId
- 		res_trans2.TransactionID = transactionId1
+ 		res_trans2.TransactionID = transactionId2
  		res_trans2.TransactionDateTime = args[12]
  		res_trans2.TransactionType = args[6]
  		res_trans2.TransactionFrom = args[13]
