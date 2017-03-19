@@ -40,6 +40,7 @@ type Customer struct{							// Attributes of a Customer
 	WalletWorth string `json:"walletWorth"`
 	MerchantIDs string `json:"merchantIDs"`
 	MerchantNames string `json:"merchantNames"`
+	MerchantColors string `json:"merchantColors"`
 	MerchantCurrencies string `json:"merchantCurrencies"`
 	MerchantsPointsCount string `json:"merchantsPointsCount"`
 	MerchantsPointsWorth string `json:"merchantsPointsWorth"`
@@ -293,8 +294,8 @@ func (t *ManageCustomer) getAllCustomers(stub shim.ChaincodeStubInterface, args 
 // ============================================================================================================================
 func (t *ManageCustomer) createCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 9 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 9\", \"code\" : \"503\"}"
+	if len(args) != 10 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 10\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -308,9 +309,10 @@ func (t *ManageCustomer) createCustomer(stub shim.ChaincodeStubInterface, args [
 	walletWorth := args[3]
 	merchantIDs := args[4]
 	merchantNames := args[5]
-	merchantCurrencies := args[6]
-	merchantsPointsCount := args[7]
-	merchantsPointsWorth := args[8]
+	merchantColors := args[6]
+	merchantCurrencies := args[7]
+	merchantsPointsCount := args[8]
+	merchantsPointsWorth := args[9]
 	
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
@@ -335,6 +337,7 @@ func (t *ManageCustomer) createCustomer(stub shim.ChaincodeStubInterface, args [
 		`"walletWorth": "` + walletWorth + `" , `+
 		`"merchantIDs": "` + merchantIDs + `" , `+ 
 		`"merchantNames": "` + merchantNames + `" , `+ 
+		`"merchantColors": "` + merchantColors + `" , `+
 		`"merchantCurrencies": "` + merchantCurrencies + `" , `+ 
 		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
