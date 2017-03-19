@@ -450,6 +450,7 @@ func (t *ManageCustomer) updateCustomerAccumulation(stub shim.ChaincodeStubInter
 		`"walletWorth": "` + res.WalletWorth + `" , `+
 		`"merchantIDs": "` + res.MerchantIDs + `" , `+
 		`"merchantNames": "` + res.MerchantNames + `" , `+
+		`"merchantColors": "` + res.MerchantColors + `" , `+
 		`"merchantCurrencies": "` + res.MerchantCurrencies + `" , `+
 		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
@@ -573,6 +574,7 @@ func (t *ManageCustomer) updateCustomerRedemption(stub shim.ChaincodeStubInterfa
 		`"walletWorth": "` + res.WalletWorth + `" , `+
 		`"merchantIDs": "` + res.MerchantIDs + `" , `+
 		`"merchantNames": "` + res.MerchantNames + `" , `+
+		`"merchantColors": "` + res.MerchantColors + `" , `+
 		`"merchantCurrencies": "` + res.MerchantCurrencies + `" , `+
 		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
