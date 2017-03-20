@@ -66,6 +66,7 @@ type Merchant struct{							// Attributes of a Merchant
 	IndustryColor string `json:"industryColor"`					
 	PointsPerDollarSpent string `json:"pointsPerDollarSpent"`
 	ExchangeRate string `json:"exchangeRate"`
+	PurchaseBalance string `json:"purchaseBalance"`
 	MerchantCurrency string `json:"merchantCurrency"`
 	MerchantCU_date string `json:"merchantCU_date"`
 }
@@ -548,8 +549,9 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 		res.IndustryColor = args[4]
 		res.PointsPerDollarSpent = args[5]
 		res.ExchangeRate = args[6]
-		res.MerchantCurrency = args[7]
-		res.MerchantCU_date = args[8]
+		res.PurchaseBalance = args[7]
+		res.MerchantCurrency = args[8]
+		res.MerchantCU_date = args[9]
 	}else{
 		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
@@ -568,6 +570,7 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 		`"industryColor": "` + res.IndustryColor + `" , `+
 		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+
 		`"exchangeRate": "` + res.ExchangeRate + `" , `+ 
+		`"purchaseBalance": "` + res.PurchaseBalance + `" , `+ 
 		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+
 		`"merchantCU_date": "` +  res.MerchantCU_date + `" `+ 
 		`}`
@@ -590,8 +593,8 @@ func (t *ManageMerchant) updateMerchant(stub shim.ChaincodeStubInterface, args [
 // ============================================================================================================================
 func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 9 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 9\", \"code\" : \"503\"}"
+	if len(args) != 10 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 10\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -606,8 +609,9 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 	industryColor := args[4]
 	pointsPerDollarSpent := args[5]
 	exchangeRate := args[6]
-	merchantCurrency := args[7]
-	merchantCU_date := args[8]
+	purchaseBalance := args[7]
+	merchantCurrency := args[8]
+	merchantCU_date := args[9]
 	merchantAsBytes, err := stub.GetState(merchantID)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant merchantID")
@@ -635,6 +639,7 @@ func (t *ManageMerchant) createMerchant(stub shim.ChaincodeStubInterface, args [
 		`"industryColor": "` + industryColor + `" , `+
 		`"pointsPerDollarSpent": "` + pointsPerDollarSpent + `" , `+ 
 		`"exchangeRate": "` + exchangeRate + `" , `+ 
+		`"purchaseBalance": "` + purchaseBalance + `" , `+
 		`"merchantCurrency": "` + merchantCurrency + `" , `+
 		`"merchantCU_date": "` + merchantCU_date + `" `+ 
 	`}`
