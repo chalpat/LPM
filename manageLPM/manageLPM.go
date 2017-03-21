@@ -278,7 +278,8 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-		if valIndex.CustomerID == customerId && valIndex.TransactionFrom == merchantName{
+		//if valIndex.CustomerID == customerId && valIndex.TransactionFrom == merchantName{
+                if valIndex.CustomerID == customerId{
 			fmt.Println("Customer's merchant found")
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
