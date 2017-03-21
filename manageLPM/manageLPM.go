@@ -175,7 +175,9 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 	// Handle different functions
 	if function == "getCustomerByID" {													//Read a Customer by Id
 		return t.getCustomerByID(stub, args)
-	} else if function == "getActivityHistory" {													//Read all transactions 
+	}else if function == "getCustomerDetailsByID" {													//Read all transactions 
+		return t.getCustomerDetailsByID(stub, args)
+	}else if function == "getActivityHistory" {													//Read all transactions 
 		return t.getActivityHistory(stub, args)
 	}else if function == "getAllCustomers" {													//Read all Customers
 		return t.getAllCustomers(stub, args)
@@ -231,6 +233,38 @@ func (t *ManageLPM) getCustomerByID(stub shim.ChaincodeStubInterface, args []str
 	fmt.Print("valAsbytes : ")
 	fmt.Println(valAsbytes)
 	fmt.Println("end getCustomerByID")
+	return valAsbytes, nil													//send it onward
+}
+// ============================================================================================================================
+// getCustomerDetailsByID - get Customer details for a specific ID from chaincode state POST Implementation
+// ============================================================================================================================
+func (t *ManageLPM) getCustomerDetailsByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var customerId string
+	var err error
+	fmt.Println("start getCustomerDetailsByID")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set customerId
+	customerId = args[0]
+	fmt.Print("customerId in getCustomerDetailsByID : "+customerId)
+	valAsbytes, err := stub.GetState(customerId)									//get the customerId from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ customerId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Print("valAsbytes : ")
+	fmt.Println(valAsbytes)
+	fmt.Println("end getCustomerDetailsByID")
 	return valAsbytes, nil													//send it onward
 }
 // ============================================================================================================================
