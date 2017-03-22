@@ -870,10 +870,7 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 	}
 	jsonResp = "\""+ merchantName + "\":" + strconv.Itoa(userCount)
 	jsonResp = jsonResp + "}"
-	/*if strings.Contains(jsonResp, "},}"){
-		fmt.Println("in if for jsonResp contains wrong json")	
-		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
-	}*/
+	
 	fmt.Println("jsonResp : " + jsonResp)
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
