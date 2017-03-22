@@ -729,7 +729,7 @@ func (t *ManageLPM) getAllMerchants(stub shim.ChaincodeStubInterface, args []str
 	return []byte(jsonResp), nil			//send it onward
 }
 // ============================================================================================================================
-// getMerchantsAccountBalance - get Merchants for a given Industry from chaincode state
+// getMerchantsAccountBalance - get merchants account balance from chaincode state
 // ============================================================================================================================
 func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var jsonResp, merchantId, merchantName, errResp string
@@ -739,8 +739,8 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	var valIndex Customer
 	var merchantIndex Merchant
 	fmt.Println("start getMerchantsAccountBalance")
-	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as an argument\", \"code\" : \"503\"}"
+	if len(args) != 2 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' and 'merchantName' as arguments\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -823,7 +823,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
-// getMerchantsAccountBalance - get Merchants for a given Industry from chaincode state
+// getMerchantsUserCount - get merchants user count from chaincode state
 // ============================================================================================================================
 func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var jsonResp, merchantName, errResp string
