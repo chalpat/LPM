@@ -179,6 +179,8 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getCustomerDetailsByID(stub, args)
 	}else if function == "getActivityHistory" {													//Read all transactions 
 		return t.getActivityHistory(stub, args)
+	}else if function == "getActivityHistoryForMerchant" {													//Read all transactions 
+		return t.getActivityHistoryForMerchant(stub, args)
 	}else if function == "getAllCustomers" {													//Read all Customers
 		return t.getAllCustomers(stub, args)
 	}else if function == "getCustomersByMerchantID" {													//Read a Customer by transId
@@ -193,6 +195,10 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getMerchantsByIndustry(stub, args)
 	}else if function == "getAllMerchants" {													//Read all Merchants
 		return t.getAllMerchants(stub, args)
+	}else if function == "getMerchantsAccountBalance" {													//Read all Merchants
+		return t.getMerchantsAccountBalance(stub, args)
+	}else if function == "getMerchantsUserCount" {													//Read all Merchants
+		return t.getMerchantsUserCount(stub, args)
 	}
 
 	fmt.Println("query did not find func: " + function)						//error
@@ -268,19 +274,18 @@ func (t *ManageLPM) getCustomerDetailsByID(stub shim.ChaincodeStubInterface, arg
 	return valAsbytes, nil													//send it onward
 }
 // ============================================================================================================================
-//  getActivityHistory - get Customer Transaction Activity details for a given merchant from chaincode state
+//  getActivityHistory - get Customer Transaction Activity details for a given customer from chaincode state
 // ============================================================================================================================
 func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var jsonResp, errResp string
 	var transactionIndex []string
 	var valIndex Transaction
 	var customerId string
-	var merchantName string
 	var err error
 	fmt.Println("start getActivityHistory")
 	
-	if len(args) != 2 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' and 'merchantName' as arguments\", \"code\" : \"503\"}"
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'customerId' as argument\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -290,10 +295,7 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 	// set customerId
 	customerId = args[0]
 	fmt.Println("customerId in getActivityHistory::" + customerId)
-	// set merchantName
-	merchantName = args[1]
-	fmt.Println("merchantName in getActivityHistory::" + merchantName)
-
+		
 	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Transaction index string")
@@ -312,9 +314,8 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-		//if valIndex.CustomerID == customerId && valIndex.TransactionFrom == merchantName{
         if valIndex.CustomerID == customerId{
-			fmt.Println("Customer's merchant found")
+			fmt.Println("Customer found")
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
@@ -340,6 +341,76 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getActivityHistory")
+	return []byte(jsonResp), nil											//send it onward
+}
+// ============================================================================================================================
+//  getActivityHistoryForMerchant - get Customer Transaction Activity details for a given merchant from chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, errResp string
+	var transactionIndex []string
+	var valIndex Transaction
+	var merchantName string
+	var err error
+	fmt.Println("start getActivityHistoryForMerchant")
+	
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantName
+	merchantName = args[0]
+	fmt.Println("merchantName in getActivityHistoryForMerchant::" + merchantName)
+
+	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Transaction index string")
+	}
+	json.Unmarshal(transactionAsBytes, &transactionIndex)								//un stringify it aka JSON.parse()
+	jsonResp = "{"
+	for i,val := range transactionIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getActivityHistoryForMerchant")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		json.Unmarshal(valueAsBytes, &valIndex)
+		fmt.Print("valIndex: ")
+		fmt.Print(valIndex)
+		if valIndex.TransactionFrom == merchantName{
+			fmt.Println("Customer's merchant found")
+			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+			fmt.Println("jsonResp inside if")
+			fmt.Println(jsonResp)
+			fmt.Println("transactionIndex::")
+			fmt.Println(transactionIndex)
+			fmt.Println("length::")
+			fmt.Println(len(transactionIndex))
+			if i < len(transactionIndex)-1 {
+				fmt.Println("i::")
+				fmt.Println(i)
+				jsonResp = jsonResp + ","
+				fmt.Println("jsonResp inside if if")
+				fmt.Println(jsonResp)
+			}
+		} 
+	}
+	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
+	fmt.Println("end getActivityHistoryForMerchant")
 	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
@@ -656,6 +727,158 @@ func (t *ManageLPM) getAllMerchants(stub shim.ChaincodeStubInterface, args []str
 
 	fmt.Println("end getAllMerchants")
 	return []byte(jsonResp), nil			//send it onward
+}
+// ============================================================================================================================
+// getMerchantsAccountBalance - get Merchants for a given Industry from chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, merchantId, merchantName, errResp string
+	var err error
+	var customerIndex []string
+	accountBalance := float64(0.0)
+	var valIndex Customer
+	var merchantIndex Merchant
+	fmt.Println("start getMerchantsAccountBalance")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantName
+	merchantId = args[0]
+	merchantName = args[1]
+
+	// Get Merchants Balance from Merchant Struct START
+	merchantAsbytes, err := stub.GetState(merchantId)
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ merchantId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	json.Unmarshal(merchantAsbytes, &merchantIndex)
+	fmt.Print("accountBalance for merchant : ")
+	fmt.Print(merchantIndex.PurchaseBalance)
+	accountBalanceMerchant, _ := strconv.ParseFloat(merchantIndex.PurchaseBalance, 64)
+	// Get Merchants Balance from Merchant Struct END
+
+	customerAsBytes, err := stub.GetState(CustomerIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer index string")
+	}
+	json.Unmarshal(customerAsBytes, &customerIndex)			//un stringify it aka JSON.parse()
+	fmt.Print("customerIndex : ")
+	fmt.Println(customerIndex)
+	jsonResp = "{"
+	for i,val := range customerIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getMerchantsAccountBalance")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		json.Unmarshal(valueAsBytes, &valIndex)
+		fmt.Print("valIndex: ")
+		fmt.Print(valIndex)
+		if strings.Contains(valIndex.MerchantNames, merchantName){
+			fmt.Println("Merchant found")
+
+			// Sum all pointsWorth
+			fmt.Println("valIndex.MerchantsPointsWorth::"+valIndex.MerchantsPointsWorth)
+			stringSlice := strings.Split(valIndex.MerchantsPointsWorth, ",")
+			for j,val := range stringSlice{
+				fmt.Println(strconv.Itoa(j) + " - looking at " + val + " for balance")
+				valToBeAdded, _ := strconv.ParseFloat(val, 64)
+     		    accountBalance = accountBalance + valToBeAdded
+    		}
+
+    		accountBalance = accountBalance + accountBalanceMerchant
+
+			jsonResp = jsonResp + "\""+ merchantId + "\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
+			fmt.Println("jsonResp inside if")
+			fmt.Println(jsonResp)
+			
+			// This should be commented as it will return only one value
+			/*if i < len(customerIndex)-1 {
+				jsonResp = jsonResp + ","
+			}*/
+		} 
+	}
+	jsonResp = jsonResp + "}"
+	if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
+	fmt.Println("end getMerchantsAccountBalance")
+	return []byte(jsonResp), nil											//send it onward
+}
+// ============================================================================================================================
+// getMerchantsAccountBalance - get Merchants for a given Industry from chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp, merchantName, errResp string
+	var err error
+	var customerIndex []string
+	var userCount = 0;
+	var valIndex Customer
+	fmt.Println("start getMerchantsUserCount")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantName
+	merchantName = args[0]
+
+	customerAsBytes, err := stub.GetState(CustomerIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer index string")
+	}
+	json.Unmarshal(customerAsBytes, &customerIndex)			//un stringify it aka JSON.parse()
+	fmt.Print("customerIndex : ")
+	fmt.Println(customerIndex)
+	jsonResp = "{"
+	for i,val := range customerIndex{
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getMerchantsUserCount")
+		valueAsBytes, err := stub.GetState(val)
+		if err != nil {
+			errResp = "{\"Error\":\"Failed to get state for " + val + "\"}"
+			return nil, errors.New(errResp)
+		}
+		fmt.Print("valueAsBytes : ")
+		fmt.Println(valueAsBytes)
+		json.Unmarshal(valueAsBytes, &valIndex)
+		fmt.Print("valIndex: ")
+		fmt.Print(valIndex)
+		if strings.Contains(valIndex.MerchantNames, merchantName){
+			fmt.Println("Merchant found")
+			userCount++;
+		} 
+	}
+	jsonResp = "\""+ merchantName + "\":" + strconv.Itoa(userCount)
+	jsonResp = jsonResp + "}"
+	/*if strings.Contains(jsonResp, "},}"){
+		fmt.Println("in if for jsonResp contains wrong json")	
+		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
+	}*/
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
+	fmt.Println("end getMerchantsUserCount")
+	return []byte(jsonResp), nil											//send it onward
 }
 // ============================================================================================================================
 // create Customer - create a new Customer, store into chaincode state
