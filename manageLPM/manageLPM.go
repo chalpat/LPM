@@ -801,8 +801,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
     		accountBalance = accountBalance + accountBalanceMerchant
 		} 
 	}
-	jsonResp = "\""+ merchantId + "\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
-	
+	jsonResp = jsonResp + "\""+ merchantId + "\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
 		fmt.Println("in if for jsonResp contains wrong json")	
