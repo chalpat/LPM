@@ -732,15 +732,15 @@ func (t *ManageLPM) getAllMerchants(stub shim.ChaincodeStubInterface, args []str
 // getMerchantsAccountBalance - get merchants account balance from chaincode state
 // ============================================================================================================================
 func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var jsonResp, merchantId, merchantName, errResp string
+	var jsonResp, merchantId, errResp string
 	var err error
 	var customerIndex []string
 	accountBalance := float64(0.0)
 	var valIndex Customer
 	var merchantIndex Merchant
 	fmt.Println("start getMerchantsAccountBalance")
-	if len(args) != 2 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' and 'merchantName' as arguments\", \"code\" : \"503\"}"
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as argument\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -749,8 +749,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	}
 	// set merchantName
 	merchantId = args[0]
-	merchantName = args[1]
-
+	
 	// Get Merchants Balance from Merchant Struct START
 	merchantAsbytes, err := stub.GetState(merchantId)
 	if err != nil {
@@ -787,7 +786,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-		if strings.Contains(valIndex.MerchantNames, merchantName){
+		if strings.Contains(valIndex.MerchantIDs, merchantId){
 			fmt.Println("Merchant found")
 
 			// Sum all pointsWorth
@@ -800,17 +799,10 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
     		}
 
     		accountBalance = accountBalance + accountBalanceMerchant
-
-			jsonResp = jsonResp + "\""+ merchantId + "\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
-			fmt.Println("jsonResp inside if")
-			fmt.Println(jsonResp)
-			
-			// This should be commented as it will return only one value
-			/*if i < len(customerIndex)-1 {
-				jsonResp = jsonResp + ","
-			}*/
 		} 
 	}
+	jsonResp = "\""+ merchantId + "\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
+	
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
 		fmt.Println("in if for jsonResp contains wrong json")	
