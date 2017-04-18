@@ -817,14 +817,14 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 // getMerchantsUserCount - get merchants user count from chaincode state
 // ============================================================================================================================
 func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var jsonResp, merchantName, errResp string
+	var jsonResp, merchantId, errResp string
 	var err error
 	var customerIndex []string
 	var userCount = 0;
 	var valIndex Customer
 	fmt.Println("start getMerchantsUserCount")
 	if len(args) != 1 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantName' as an argument\", \"code\" : \"503\"}"
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as an argument\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -832,7 +832,7 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 		return nil, nil
 	}
 	// set merchantName
-	merchantName = args[0]
+	merchantId = args[0]
 
 	customerAsBytes, err := stub.GetState(CustomerIndexStr)
 	if err != nil {
@@ -854,12 +854,12 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-		if strings.Contains(valIndex.MerchantNames, merchantName){
+		if strings.Contains(valIndex.MerchantIDs, merchantId){
 			fmt.Println("Merchant found")
 			userCount++;
 		} 
 	}
-	jsonResp = "\""+ merchantName + "\":" + strconv.Itoa(userCount)
+	jsonResp = jsonResp + "\"merchantUsersCount\":" + strconv.Itoa(userCount)
 	jsonResp = jsonResp + "}"
 	
 	fmt.Println("jsonResp : " + jsonResp)
