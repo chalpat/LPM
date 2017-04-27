@@ -1851,6 +1851,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		return nil, nil
 	}
 	// Calculation
+	fmt.Println("-------------------------startingBalance----------------------------"+startingBalance)
 	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
 	fmt.Println("-------------------------floatStartingBalance----------------------------"+strconv.FormatFloat(floatStartingBalance, 'f', 2, 64))
 	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
