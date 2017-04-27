@@ -51,7 +51,7 @@ type Customer struct{							// Attributes of a Customer
 type Transaction struct{							// Attributes of a Transaction 
 	TransactionID string `json:"transactionId"`					
 	TransactionDateTime string `json:"transactionDateTime"`
-	TransactionType string `json:"transactionType"`				// Values are Purchase, Transfer, Accumulation (Add Points)
+	TransactionType string `json:"transactionType"`				// Values are Purchase, Transfer, Accumulation (Add Points), CustomerOnBoarding
 	TransactionFrom string `json:"transactionFrom"`
 	TransactionTo string `json:"transactionTo"`
 	Credit string `json:"credit"`
@@ -1808,7 +1808,7 @@ func (t *ManageLPM) deleteMerchant(stub shim.ChaincodeStubInterface, args []stri
 // ============================================================================================================================
 func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	var merchantIndex []string
+	//var merchantIndex []string
 	var walletWorth, merchantIDs, merchantNames, merchantColors, merchantCurrencies, merchantsPointsCount, merchantsPointsWorth string
 	if len(args) != 6 {
 		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 6\", \"code\" : \"503\"}"
@@ -1822,22 +1822,22 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	customerId := args[0]
 	merchantId := args[1]
 	startingBalance := args[2]
-	
+	fmt.Println("------------------------1-----------------------------")
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
 		return nil, errors.New("Failed to get Customer customerID")
 	}
-
+	fmt.Println("-------------------------2----------------------------")
 	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant index")
 	}
-	json.Unmarshal(merchantAsBytes, &merchantIndex)	
-	
+	//json.Unmarshal(merchantAsBytes, &merchantIndex)	
+	fmt.Println("-------------------------3----------------------------")
 	res := Customer{}
 	res_Merchant := Merchant{}
 	res_trans := Transaction{}
-
+	fmt.Println("-------------------------4----------------------------")
 	json.Unmarshal(merchantAsBytes, &res_Merchant)
 	if res_Merchant.MerchantID == merchantId{
 		fmt.Println("Merchant found with merchantId in associateCustomer: " + merchantId)
@@ -1852,6 +1852,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	}
 	// Calculation
 	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
+	fmt.Println("-------------------------floatStartingBalance----------------------------"+strconv.FormatFloat(floatStartingBalance, 'f', 2, 64))
 	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
 	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
 	fmt.Println("pointsToBeCredited in associateCustomer: " + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64))
