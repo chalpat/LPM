@@ -156,6 +156,8 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.updateMerchant(stub, args)
 	}else if function == "deleteMerchant" {									// delete a Merchant
 		return t.deleteMerchant(stub, args)
+	}else if function == "associateCustomer" {									// delete a Merchant
+		return t.associateCustomer(stub, args)
 	}
 
 	fmt.Println("invoke did not find func: " + function)
@@ -1799,5 +1801,152 @@ func (t *ManageLPM) deleteMerchant(stub shim.ChaincodeStubInterface, args []stri
 	} 
 
 	fmt.Println("Merchant deleted succcessfully")
+	return nil, nil
+}
+// ============================================================================================================================
+// associate Customer - associate a customer to Merchant, store into chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	var merchantIndex []string
+	var walletWorth, merchantIDs, merchantNames, merchantColors, merchantCurrencies, merchantsPointsCount, merchantsPointsWorth string
+	if len(args) != 6 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 6\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Println("start associateCustomer")
+	customerId := args[0]
+	merchantId := args[1]
+	startingBalance := args[2]
+	
+	customerAsBytes, err := stub.GetState(customerId)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer customerID")
+	}
+
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)	
+	
+	res := Customer{}
+	res_Merchant := Merchant{}
+	res_trans := Transaction{}
+
+	json.Unmarshal(merchantAsBytes, &res_Merchant)
+	if res_Merchant.MerchantID == merchantId{
+		fmt.Println("Merchant found with merchantId in associateCustomer: " + merchantId)
+		fmt.Println(res_Merchant);
+	}else{
+		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// Calculation
+	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
+	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
+	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
+	fmt.Println("pointsToBeCredited in associateCustomer: " + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64))
+
+	json.Unmarshal(customerAsBytes, &res)
+	if res.CustomerID == customerId{
+		fmt.Println("Customer found with customerId in associateCustomer: " + customerId)
+		fmt.Println(res);
+		walletWorth = res.WalletWorth + startingBalance
+		merchantIDs = res.MerchantIDs + "," + res_Merchant.MerchantID
+		merchantNames = res.MerchantNames + "," + res_Merchant.MerchantName
+		merchantColors = res.MerchantColors + "," + res_Merchant.IndustryColor
+		merchantCurrencies = res.MerchantCurrencies + "," + res_Merchant.MerchantCurrency
+		merchantsPointsCount = res.MerchantsPointsCount + "," + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
+		merchantsPointsWorth = res.MerchantsPointsWorth + "," + startingBalance
+	
+		res_trans.TransactionID = args[3]
+ 		res_trans.TransactionDateTime = args[4]
+ 		res_trans.TransactionType = args[5]
+ 		res_trans.TransactionFrom = res_Merchant.MerchantName
+ 		res_trans.TransactionTo = res.UserName
+ 		res_trans.Credit = strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
+ 		res_trans.Debit = "0"
+ 		res_trans.CustomerID = customerId
+	}else{
+		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+
+	//build the Customer json string manually
+	customer_json := 	`{`+
+		`"customerId": "` + customerId + `" , `+
+		`"customerName": "` + res.CustomerName + `" , `+
+		`"userName": "` + res.UserName + `" , `+
+		`"walletWorth": "` + walletWorth + `" , `+
+		`"merchantIDs": "` + merchantIDs + `" , `+ 
+		`"merchantNames": "` + merchantNames + `" , `+ 
+		`"merchantColors": "` + merchantColors + `" , `+
+		`"merchantCurrencies": "` + merchantCurrencies + `" , `+ 
+		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
+		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
+	`}`
+	fmt.Println("customer_json: " + customer_json)
+	fmt.Print("customer_json in bytes array: ")
+	fmt.Println([]byte(customer_json))
+	err = stub.PutState(customerId, []byte(customer_json))									//store Customer with customerId as key
+	if err != nil {
+		return nil, err
+	}
+
+	// build the Transaction json string manually
+	transaction_json := `{`+
+		`"transactionId": "` + res_trans.TransactionID + `" , `+
+		`"transactionDateTime": "` + res_trans.TransactionDateTime + `" , `+
+		`"transactionType": "` + res_trans.TransactionType + `" , `+
+		`"transactionFrom": "` + res_trans.TransactionFrom + `" , `+ 
+		`"transactionTo": "` + res_trans.TransactionTo + `" , `+ 
+		`"credit": "` + res_trans.Credit + `" , `+ 
+		`"debit": "` + res_trans.Debit + `" , `+ 
+		`"customerId": "` +  res_trans.CustomerID + `" `+ 
+	`}`
+	err = stub.PutState(res_trans.TransactionID, []byte(transaction_json))					//store Transaction with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	//get the Transaction index
+	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Transaction index")
+	}
+	var transactionIndex []string	
+	json.Unmarshal(transactionAsBytes, &transactionIndex)							//un stringify it aka JSON.parse()
+	
+	//append
+	transactionIndex = append(transactionIndex, res_trans.TransactionID)			//add Transaction res_trans.TransactionID to index list
+	
+	jsonAsBytes, _ := json.Marshal(transactionIndex)
+	fmt.Print("update customer jsonAsBytes: ")
+	fmt.Println(jsonAsBytes)
+	err = stub.PutState(TransactionIndexStr, jsonAsBytes)						//store name of Transaction
+	if err != nil {
+		return nil, err
+	}
+
+	tosend := "{ \"customerID\" : \""+customerId+"\", \"message\" : \"Customer associated succcessfully\", \"code\" : \"200\"}"
+	err = stub.SetEvent("evtsender", []byte(tosend))
+	if err != nil {
+		return nil, err
+	} 
+
+	fmt.Println("end associateCustomer")
 	return nil, nil
 }
