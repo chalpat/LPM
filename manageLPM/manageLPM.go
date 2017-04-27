@@ -1821,24 +1821,23 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	customerId := args[0]
 	merchantId := args[1]
 	startingBalance := args[2]
-	fmt.Println("------------------------1-----------------------------")
+	
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
 		return nil, errors.New("Failed to get Customer customerID")
 	}
-	fmt.Println("-------------------------2----------------------------")
+	
 	merchantAsBytes, err := stub.GetState(merchantId)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant merchantID")
 	}
 	
-	fmt.Println("-------------------------3----------------------------")
 	res := Customer{}
 	res_Merchant := Merchant{}
 	res_trans := Transaction{}
-	fmt.Println("-------------------------4----------------------------")
+	
 	json.Unmarshal(merchantAsBytes, &res_Merchant)
-	fmt.Println("-------------------------5----------------------------")
+	
 	if res_Merchant.MerchantID == merchantId{
 		fmt.Println("Merchant found with merchantId in associateCustomer: " + merchantId)
 		fmt.Println(res_Merchant);
@@ -1851,12 +1850,12 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		return nil, nil
 	}
 	// Calculation
-	fmt.Println("-------------------------startingBalance----------------------------"+startingBalance)
+	
 	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
-	fmt.Println("-------------------------floatStartingBalance----------------------------"+strconv.FormatFloat(floatStartingBalance, 'f', 2, 64))
+	//fmt.Println("-------------------------floatStartingBalance----------------------------"+strconv.FormatFloat(floatStartingBalance, 'f', 2, 64))
 	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
 	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
-	fmt.Println("pointsToBeCredited in associateCustomer: " + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64))
+	//fmt.Println("pointsToBeCredited in associateCustomer: " + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64))
 
 	json.Unmarshal(customerAsBytes, &res)
 	if res.CustomerID == customerId{
@@ -1875,7 +1874,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
  		res_trans.TransactionType = args[5]
  		res_trans.TransactionFrom = res_Merchant.MerchantName
  		res_trans.TransactionTo = res.UserName
- 		res_trans.Credit = strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
+ 		res_trans.Credit = startingBalance
  		res_trans.Debit = "0"
  		res_trans.CustomerID = customerId
 	}else{
