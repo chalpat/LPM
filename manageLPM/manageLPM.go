@@ -1808,7 +1808,6 @@ func (t *ManageLPM) deleteMerchant(stub shim.ChaincodeStubInterface, args []stri
 // ============================================================================================================================
 func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	//var merchantIndex []string
 	var walletWorth, merchantIDs, merchantNames, merchantColors, merchantCurrencies, merchantsPointsCount, merchantsPointsWorth string
 	if len(args) != 6 {
 		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 6\", \"code\" : \"503\"}"
@@ -1828,17 +1827,18 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		return nil, errors.New("Failed to get Customer customerID")
 	}
 	fmt.Println("-------------------------2----------------------------")
-	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	merchantAsBytes, err := stub.GetState(merchantId)
 	if err != nil {
-		return nil, errors.New("Failed to get Merchant index")
+		return nil, errors.New("Failed to get Merchant merchantID")
 	}
-	//json.Unmarshal(merchantAsBytes, &merchantIndex)	
+	
 	fmt.Println("-------------------------3----------------------------")
 	res := Customer{}
 	res_Merchant := Merchant{}
 	res_trans := Transaction{}
 	fmt.Println("-------------------------4----------------------------")
 	json.Unmarshal(merchantAsBytes, &res_Merchant)
+	fmt.Println("-------------------------5----------------------------")
 	if res_Merchant.MerchantID == merchantId{
 		fmt.Println("Merchant found with merchantId in associateCustomer: " + merchantId)
 		fmt.Println(res_Merchant);
