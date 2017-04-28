@@ -156,6 +156,8 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.updateMerchant(stub, args)
 	}else if function == "deleteMerchant" {									// delete a Merchant
 		return t.deleteMerchant(stub, args)
+	}else if function == "updateMerchantsPPDS" {									//update a Merchant's PPDS
+		return t.updateMerchantsPPDS(stub, args)
 	}else if function == "associateCustomer" {									// delete a Merchant
 		return t.associateCustomer(stub, args)
 	}
@@ -1741,6 +1743,79 @@ func (t *ManageLPM) updateMerchantsPurchaseBal(stub shim.ChaincodeStubInterface,
 	} 
 
 	fmt.Println("Merchant purchase balance updated succcessfully")
+	return nil, nil
+}
+// ============================================================================================================================
+// Write - update merchant's PPDS into chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) updateMerchantsPPDS(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	fmt.Println("Updating Merchant - Points Per Dolllar Spent")
+	if len(args) != 3 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 3\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	merchantId := args[0]
+	newPPDS := args[1]
+	merchantAsBytes, err := stub.GetState(merchantId)									//get the Merchant for the specified merchant from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \"Failed to get state for " + merchantId + "\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	res := Merchant{}
+	json.Unmarshal(merchantAsBytes, &res)
+	if res.MerchantID == merchantId{
+		fmt.Println("Merchant found with merchantId : " + merchantId)
+		fmt.Println("Merchants old pointsPerDollarSpent : " + res.PointsPerDollarSpent)
+		fmt.Println("Merchants new pointsPerDollarSpent : " + newPPDS)
+		res.PointsPerDollarSpent = newPPDS 
+		res.MerchantCU_date = args[2]
+	}else{
+		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	
+	//build the Merchant json string manually
+	merchant_json := 	`{`+
+		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantUserName": "` + res.MerchantUserName + `" , `+
+		`"merchantName": "` + res.MerchantName + `" , `+
+		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
+		`"industryColor": "` + res.IndustryColor + `" , `+
+		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+
+		`"exchangeRate": "` + res.ExchangeRate + `" , `+ 
+		`"purchaseBalance": "` + res.PurchaseBalance + `" , `+ 
+		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+
+		`"merchantCU_date": "` +  res.MerchantCU_date + `" `+ 
+		`}`
+
+	fmt.Println("merchant_json in updateMerchantsPPDS::" + merchant_json)
+		
+	err = stub.PutState(merchantId, []byte(merchant_json))						//store Merchant with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	tosend := "{ \"merchantId\" : \""+merchantId+"\", \"message\" : \"Merchant points per dollar spent updated succcessfully\", \"code\" : \"200\"}"
+	err = stub.SetEvent("evtsender", []byte(tosend))
+	if err != nil {
+		return nil, err
+	} 
+
+	fmt.Println("Merchant points per dollar spent updated succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
