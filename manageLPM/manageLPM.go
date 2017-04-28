@@ -1924,19 +1924,21 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		} 
 		return nil, nil
 	}
-	// Calculation
-	
+
+	// Calculation	
 	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
 	//fmt.Println("-------------------------floatStartingBalance----------------------------"+strconv.FormatFloat(floatStartingBalance, 'f', 2, 64))
 	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
 	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
 	//fmt.Println("pointsToBeCredited in associateCustomer: " + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64))
-
 	json.Unmarshal(customerAsBytes, &res)
+	floatWalletWorth, _ := strconv.ParseFloat(res.WalletWorth, 64)
+	newWalletWorth := floatWalletWorth + floatStartingBalance
+	fmt.Println("newWalletWorth in associateCustomer: " + strconv.FormatFloat(newWalletWorth, 'f', 2, 64))
 	if res.CustomerID == customerId{
 		fmt.Println("Customer found with customerId in associateCustomer: " + customerId)
 		fmt.Println(res);
-		walletWorth = res.WalletWorth + startingBalance
+		walletWorth = strconv.FormatFloat(newWalletWorth, 'f', 2, 64)
 		merchantIDs = res.MerchantIDs + "," + res_Merchant.MerchantID
 		merchantNames = res.MerchantNames + "," + res_Merchant.MerchantName
 		merchantColors = res.MerchantColors + "," + res_Merchant.IndustryColor
