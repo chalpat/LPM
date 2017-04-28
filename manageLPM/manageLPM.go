@@ -1934,7 +1934,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	json.Unmarshal(customerAsBytes, &res)
 	floatWalletWorth, _ := strconv.ParseFloat(res.WalletWorth, 64)
 	newWalletWorth := floatWalletWorth + floatStartingBalance
-	fmt.Println("newWalletWorth in associateCustomer: " + strconv.FormatFloat(newWalletWorth, 'f', 2, 64))
+	//fmt.Println("newWalletWorth in associateCustomer: " + strconv.FormatFloat(newWalletWorth, 'f', 2, 64))
 	if res.CustomerID == customerId{
 		fmt.Println("Customer found with customerId in associateCustomer: " + customerId)
 		fmt.Println(res);
@@ -1951,7 +1951,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
  		res_trans.TransactionType = args[5]
  		res_trans.TransactionFrom = res_Merchant.MerchantName
  		res_trans.TransactionTo = res.UserName
- 		res_trans.Credit = startingBalance
+ 		res_trans.Credit = strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
  		res_trans.Debit = "0"
  		res_trans.CustomerID = customerId
 	}else{
