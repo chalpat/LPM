@@ -888,8 +888,8 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 // ============================================================================================================================
 func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
-	if len(args) != 10 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 10\", \"code\" : \"503\"}"
+	if len(args) != 13 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 13\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -901,13 +901,16 @@ func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []stri
 	userName := args[1]
 	customerName := args[2]
 	walletWorth := args[3]
-	merchantIDs := args[4]
-	merchantNames := args[5]
-	merchantColors := args[6]
-	merchantCurrencies := args[7]
+	merchantID := args[4]
+	merchantName := args[5]
+	merchantColor := args[6]
+	merchantCurrency := args[7]
 	merchantsPointsCount := args[8]
 	merchantsPointsWorth := args[9]
-	
+	transactionID := args[10]
+ 	transactionDateTime := args[11]
+	transactionType := args[12]
+
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
 		return nil, errors.New("Failed to get Customer customerID")
@@ -929,10 +932,10 @@ func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []stri
 		`"customerName": "` + customerName + `" , `+
 		`"userName": "` + userName + `" , `+
 		`"walletWorth": "` + walletWorth + `" , `+
-		`"merchantIDs": "` + merchantIDs + `" , `+ 
-		`"merchantNames": "` + merchantNames + `" , `+ 
-		`"merchantColors": "` + merchantColors + `" , `+
-		`"merchantCurrencies": "` + merchantCurrencies + `" , `+ 
+		`"merchantIDs": "` + merchantID + `" , `+ 
+		`"merchantNames": "` + merchantName + `" , `+ 
+		`"merchantColors": "` + merchantColor + `" , `+
+		`"merchantCurrencies": "` + merchantCurrency + `" , `+ 
 		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
 	`}`
@@ -958,6 +961,41 @@ func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []stri
 	fmt.Print("jsonAsBytes: ")
 	fmt.Println(jsonAsBytes)
 	err = stub.PutState(CustomerIndexStr, jsonAsBytes)						//store name of Customer
+	if err != nil {
+		return nil, err
+	}
+
+	// build the Transaction json string manually
+	transaction_json := `{`+
+		`"transactionId": "` + transactionID + `" , `+
+		`"transactionDateTime": "` + transactionDateTime + `" , `+
+		`"transactionType": "` + transactionType + `" , `+
+		`"transactionFrom": "` + merchantName + `" , `+ 
+		`"transactionTo": "` + userName + `" , `+ 
+		`"credit": "` + walletWorth + `" , `+ 
+		`"debit": "` + "0" + `" , `+ 
+		`"customerId": "` +  customerId + `" `+ 
+	`}`
+	err = stub.PutState(transactionID, []byte(transaction_json))					//store Transaction with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	//get the Transaction index
+	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Transaction index")
+	}
+	var transactionIndex []string	
+	json.Unmarshal(transactionAsBytes, &transactionIndex)							//un stringify it aka JSON.parse()
+	
+	//append
+	transactionIndex = append(transactionIndex, transactionID)			//add Transaction transactionID to index list
+	
+	transactioJsonAsBytes, _ := json.Marshal(transactionIndex)
+	fmt.Print("update transaction jsonAsBytes: ")
+	fmt.Println(transactioJsonAsBytes)
+	err = stub.PutState(TransactionIndexStr, transactioJsonAsBytes)						//store name of Transaction
 	if err != nil {
 		return nil, err
 	}
@@ -2023,7 +2061,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	transactionIndex = append(transactionIndex, res_trans.TransactionID)			//add Transaction res_trans.TransactionID to index list
 	
 	jsonAsBytes, _ := json.Marshal(transactionIndex)
-	fmt.Print("update customer jsonAsBytes: ")
+	fmt.Print("update transaction jsonAsBytes: ")
 	fmt.Println(jsonAsBytes)
 	err = stub.PutState(TransactionIndexStr, jsonAsBytes)						//store name of Transaction
 	if err != nil {
