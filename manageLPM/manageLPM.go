@@ -742,6 +742,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	accountBalance := float64(0.0)
 	var valIndex Customer
 	var merchantIndex Merchant
+	var merchantIndexForPointsWorth int
 	fmt.Println("start getMerchantsAccountBalance")
 	if len(args) != 1 {
 		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'merchantId' as argument\", \"code\" : \"503\"}"
@@ -765,7 +766,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 		return nil, nil
 	}
 	json.Unmarshal(merchantAsbytes, &merchantIndex)
-	fmt.Print("accountBalance for merchant : ")
+	fmt.Print("purchaseBalance for merchant : ")
 	fmt.Print(merchantIndex.PurchaseBalance)
 	accountBalanceMerchant, _ := strconv.ParseFloat(merchantIndex.PurchaseBalance, 64)
 	// Get Merchants Balance from Merchant Struct END
@@ -793,15 +794,25 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 		if strings.Contains(valIndex.MerchantIDs, merchantId){
 			fmt.Println("Merchant found")
 
-			// Sum all pointsWorth
+			// find the index of the merchant to take the merchantPointsWorth in that index only
+			fmt.Println("valIndex.MerchantIDs::"+valIndex.MerchantIDs)
+			stringSliceMerchantIDs := strings.Split(valIndex.MerchantIDs, ",")
+			for j,val := range stringSliceMerchantIDs{
+				if val == merchantId{
+					fmt.Println(strconv.Itoa(j) + " - looking at " + val + " for index")
+					merchantIndexForPointsWorth = j
+				}
+			}
+			// Sum all pointsWorth at the merchantIndex
 			fmt.Println("valIndex.MerchantsPointsWorth::"+valIndex.MerchantsPointsWorth)
 			stringSlice := strings.Split(valIndex.MerchantsPointsWorth, ",")
-			for j,val := range stringSlice{
-				fmt.Println(strconv.Itoa(j) + " - looking at " + val + " for balance")
-				valToBeAdded, _ := strconv.ParseFloat(val, 64)
-     		    accountBalance = accountBalance + valToBeAdded
+			for k,val := range stringSlice{
+				if merchantIndexForPointsWorth == k{
+					fmt.Println(strconv.Itoa(k) + " - looking at " + val + " for balance")
+					valToBeAdded, _ := strconv.ParseFloat(val, 64)
+	     		    accountBalance = accountBalance + valToBeAdded
+	     		}
     		}
-
     		accountBalance = accountBalance + accountBalanceMerchant
 		} 
 	}
