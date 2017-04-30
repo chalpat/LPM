@@ -212,8 +212,9 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getMerchantsAccountBalance(stub, args)
 	}else if function == "getMerchantsUserCount" {													//Read all Merchants
 		return t.getMerchantsUserCount(stub, args)
+	}else if function == "getOwnersMerchantUserCount" {													//Read all Merchants
+		return t.getOwnersMerchantUserCount(stub, args)
 	}
-
 	fmt.Println("query did not find func: " + function)						//error
 	errMsg := "{ \"message\" : \"Received unknown function query\", \"code\" : \"503\"}"
 	err := stub.SetEvent("errEvent", []byte(errMsg))
