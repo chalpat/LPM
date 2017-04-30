@@ -214,6 +214,8 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getMerchantsUserCount(stub, args)
 	}else if function == "getOwnersMerchantUserCount" {													//Read all Merchants
 		return t.getOwnersMerchantUserCount(stub, args)
+	}else if function == "getOwnerByID" {													//Read all Merchants
+		return t.getOwnerByID(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)						//error
 	errMsg := "{ \"message\" : \"Received unknown function query\", \"code\" : \"503\"}"
@@ -892,6 +894,38 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getMerchantsUserCount")
 	return []byte(jsonResp), nil											//send it onward
+}
+// ============================================================================================================================
+// getOwnerByID - get Owner details for a specific ID from chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) getOwnerByID(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var ownerId string
+	var err error
+	fmt.Println("start getOwnerByID")
+	if len(args) != 1 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 'ownerId' as an argument\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set ownerId
+	ownerId = args[0]
+	fmt.Print("ownerId in getOwnerByID : "+ownerId)
+	valAsbytes, err := stub.GetState(ownerId)									//get the ownerId from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \""+ ownerId + " not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Print("valAsbytes : ")
+	fmt.Println(valAsbytes)
+	fmt.Println("end getOwnerByID")
+	return valAsbytes, nil													//send it onward
 }
 // ============================================================================================================================
 // getOwnersMerchantUserCount - get owners merchants and users count from chaincode state
