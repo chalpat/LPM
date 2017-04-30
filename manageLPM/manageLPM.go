@@ -33,7 +33,8 @@ type ManageLPM struct {
 
 var CustomerIndexStr = "_Customerindex"				// name for the key/value that will store a list of all known Customer
 var TransactionIndexStr = "_Transactionindex"		// name for the key/value that will store a list of all known Transaction
-var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will store a list of all known Merchants
+var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will store a list of all known Merchant
+var OwnerIndexStr = "_Ownerindex"				//name for the key/value that will store a list of all known Owner
 
 type Customer struct{							// Attributes of a Customer 
 	CustomerID string `json:"customerId"`					
@@ -70,6 +71,12 @@ type Merchant struct{							// Attributes of a Merchant
 	PurchaseBalance string `json:"purchaseBalance"`
 	MerchantCurrency string `json:"merchantCurrency"`
 	MerchantCU_date string `json:"merchantCU_date"`
+}
+
+type Owner struct{							// Attributes of a Owner
+	OwnerID string `json:"ownerId"`					
+	OwnerUserName string `json:"ownerUserName"`
+	OwnerName string `json:"ownerName"`
 }
 
 // ============================================================================================================================
@@ -156,6 +163,8 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.updateMerchant(stub, args)
 	}else if function == "deleteMerchant" {									// delete a Merchant
 		return t.deleteMerchant(stub, args)
+	}else if function == "createOwner" {									// create a owner
+		return t.createOwner(stub, args)
 	}else if function == "updateMerchantsPPDS" {									//update a Merchant's PPDS
 		return t.updateMerchantsPPDS(stub, args)
 	}else if function == "associateCustomer" {									// delete a Merchant
@@ -882,6 +891,54 @@ func (t *ManageLPM) getMerchantsUserCount(stub shim.ChaincodeStubInterface, args
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getMerchantsUserCount")
 	return []byte(jsonResp), nil											//send it onward
+}
+// ============================================================================================================================
+// getOwnersMerchantUserCount - get owners merchants and users count from chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) getOwnersMerchantUserCount(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var jsonResp string
+	var err error
+	var merchantIndex []string
+	var customerIndex []string
+	var merchantCount = 0;
+	var userCount = 0;
+	fmt.Println("start getOwnersMerchantUserCount")
+	
+	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant index string")
+	}
+	json.Unmarshal(merchantAsBytes, &merchantIndex)			//un stringify it aka JSON.parse()
+	fmt.Print("merchantIndex : ")
+	fmt.Println(merchantIndex)
+	jsonResp = "{"
+	for i,val := range merchantIndex{
+		fmt.Println("Merchant found")
+		fmt.Println(strconv.Itoa(i) + " - looking at " + val)
+		merchantCount++;
+	}
+	customerAsBytes, err := stub.GetState(CustomerIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer index string")
+	}
+	json.Unmarshal(customerAsBytes, &customerIndex)			//un stringify it aka JSON.parse()
+	fmt.Print("customerIndex : ")
+	fmt.Println(customerIndex)
+	jsonResp = "{"
+	for j,valCustomer := range customerIndex{
+		fmt.Println("Customer found")
+		fmt.Println(strconv.Itoa(j) + " - looking at " + valCustomer)
+		userCount++;
+	}
+
+	jsonResp = jsonResp + "\"merchantCount\":" + strconv.Itoa(merchantCount) + "," + "\"userCount\":" + strconv.Itoa(userCount)
+	jsonResp = jsonResp + "}"
+	
+	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Print("jsonResp in bytes : ")
+	fmt.Println([]byte(jsonResp))
+	fmt.Println("end getOwnersMerchantUserCount")
+	return []byte(jsonResp), nil
 }
 // ============================================================================================================================
 // create Customer - create a new Customer, store into chaincode state
@@ -1925,6 +1982,80 @@ func (t *ManageLPM) deleteMerchant(stub shim.ChaincodeStubInterface, args []stri
 	} 
 
 	fmt.Println("Merchant deleted succcessfully")
+	return nil, nil
+}
+// ============================================================================================================================
+// create Owner - create a Owner, store into chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) createOwner(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	if len(args) != 3 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 3\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	fmt.Println("start createOwner")
+	ownerId := args[0]
+	ownerUserName := args[1]
+	ownerName := args[2]
+	
+	ownerAsBytes, err := stub.GetState(ownerId)
+	if err != nil {
+		return nil, errors.New("Failed to get Owner ownerID")
+	}
+	res := Owner{}
+	json.Unmarshal(ownerAsBytes, &res)
+	if res.OwnerID == ownerId{
+		errMsg := "{ \"message\" : \"This Owner arleady exists\", \"code\" : \"503\"}"
+		err := stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil				//all stop a Owner by this name exists
+	}
+	
+	//build the Owner json string manually
+	owner_json := 	`{`+
+		`"ownerId": "` + ownerId + `" , `+
+		`"ownerName": "` + ownerName + `" , `+
+		`"ownerUserName": "` +  ownerUserName + `" `+
+	`}`
+	fmt.Println("owner_json: " + owner_json)
+	fmt.Print("owner_json in bytes array: ")
+	fmt.Println([]byte(owner_json))
+	err = stub.PutState(ownerId, []byte(owner_json))									//store Owner with ownerId as key
+	if err != nil {
+		return nil, err
+	}
+	//get the Owner index
+	ownerIndexAsBytes, err := stub.GetState(OwnerIndexStr)
+	if err != nil {
+		return nil, errors.New("Failed to get Owner index")
+	}
+	var ownerIndex []string
+	json.Unmarshal(ownerIndexAsBytes, &ownerIndex)							//un stringify it aka JSON.parse()
+	
+	//append
+	ownerIndex = append(ownerIndex, ownerId)									//add Owner ownerID to index list
+	
+	jsonAsBytes, _ := json.Marshal(ownerIndex)
+	fmt.Print("jsonAsBytes: ")
+	fmt.Println(jsonAsBytes)
+	err = stub.PutState(OwnerIndexStr, jsonAsBytes)						//store name of Owner
+	if err != nil {
+		return nil, err
+	}
+
+	tosend := "{ \"ownerID\" : \""+ownerId+"\", \"message\" : \"Owner created succcessfully\", \"code\" : \"200\"}"
+	err = stub.SetEvent("evtsender", []byte(tosend))
+	if err != nil {
+		return nil, err
+	} 
+
+	fmt.Println("end createOwner")
 	return nil, nil
 }
 // ============================================================================================================================
