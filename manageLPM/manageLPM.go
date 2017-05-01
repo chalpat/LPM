@@ -199,7 +199,7 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getAllCustomers(stub, args)
 	}else if function == "getCustomersByMerchantID" {													//Read a Customer by transId
 		return t.getCustomersByMerchantID(stub, args)
-	}else if function == "getMerchantByName" {													//Read all Merchants
+	}else if function == "getMerchantByName" {													//Read all Merchants by Name
 		return t.getMerchantByName(stub, args)
 	}else if function == "getMerchantByID" {													//Read all Merchants
 		return t.getMerchantByID(stub, args)
@@ -547,7 +547,7 @@ func (t *ManageLPM) getMerchantByName(stub shim.ChaincodeStubInterface, args []s
 	}
 	// set merchant's name
 	merchantName = args[0]
-	//fmt.Println("merchantName" + merchantName)
+	fmt.Println("merchantName" + merchantName)
 	merchantAsBytes, err := stub.GetState(MerchantIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant index string")
@@ -579,7 +579,7 @@ func (t *ManageLPM) getMerchantByName(stub shim.ChaincodeStubInterface, args []s
 		} 
 	}
 	jsonResp = jsonResp + "}"
-	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Println("jsonResp in getMerchantByName: " + jsonResp)
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getMerchantByName")
