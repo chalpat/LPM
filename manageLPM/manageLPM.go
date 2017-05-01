@@ -167,10 +167,11 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.createOwner(stub, args)
 	}else if function == "updateMerchantsPPDS" {									//update a Merchant's PPDS
 		return t.updateMerchantsPPDS(stub, args)
-	}else if function == "associateCustomer" {									// delete a Merchant
+	}else if function == "associateCustomer" {									// associate a customer to Merchant
 		return t.associateCustomer(stub, args)
+	}else if function == "updateMerchantsExchangeRate" {									// update a Merchant's Exchange Rate
+		return t.updateMerchantsExchangeRate(stub, args)
 	}
-
 	fmt.Println("invoke did not find func: " + function)
 	errMsg := "{ \"message\" : \"Received unknown function invocation\", \"code\" : \"503\"}"
 	err := stub.SetEvent("errEvent", []byte(errMsg))
@@ -1957,6 +1958,79 @@ func (t *ManageLPM) updateMerchantsPPDS(stub shim.ChaincodeStubInterface, args [
 	} 
 
 	fmt.Println("Merchant points per dollar spent updated succcessfully")
+	return nil, nil
+}
+// ============================================================================================================================
+// Write - update merchant's Exchange Rate into chaincode state
+// ============================================================================================================================
+func (t *ManageLPM) updateMerchantsExchangeRate(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var err error
+	fmt.Println("Updating Merchant - ExchangeRate")
+	if len(args) != 3 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 3\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	// set merchantId
+	merchantId := args[0]
+	newExchangeRate := args[1]
+	merchantAsBytes, err := stub.GetState(merchantId)				//get the Merchant for the specified merchant from chaincode state
+	if err != nil {
+		errMsg := "{ \"message\" : \"Failed to get state for " + merchantId + "\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	res := Merchant{}
+	json.Unmarshal(merchantAsBytes, &res)
+	if res.MerchantID == merchantId{
+		fmt.Println("Merchant found with merchantId : " + merchantId)
+		fmt.Println("Merchants old exchangeRate : " + res.ExchangeRate)
+		fmt.Println("Merchants new exchangeRate : " + newExchangeRate)
+		res.ExchangeRate = newExchangeRate
+		res.MerchantCU_date = args[2]
+	}else{
+		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	
+	//build the Merchant json string manually
+	merchant_json := 	`{`+
+		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantUserName": "` + res.MerchantUserName + `" , `+
+		`"merchantName": "` + res.MerchantName + `" , `+
+		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
+		`"industryColor": "` + res.IndustryColor + `" , `+
+		`"pointsPerDollarSpent": "` + res.PointsPerDollarSpent + `" , `+
+		`"exchangeRate": "` + res.ExchangeRate + `" , `+ 
+		`"purchaseBalance": "` + res.PurchaseBalance + `" , `+ 
+		`"merchantCurrency": "` + res.MerchantCurrency + `" , `+
+		`"merchantCU_date": "` +  res.MerchantCU_date + `" `+ 
+		`}`
+
+	fmt.Println("merchant_json in updateMerchantsExchangeRate::" + merchant_json)
+		
+	err = stub.PutState(merchantId, []byte(merchant_json))						//store Merchant with id as key
+	if err != nil {
+		return nil, err
+	}
+
+	tosend := "{ \"merchantId\" : \""+merchantId+"\", \"message\" : \"Merchant exchange rate updated succcessfully\", \"code\" : \"200\"}"
+	err = stub.SetEvent("evtsender", []byte(tosend))
+	if err != nil {
+		return nil, err
+	} 
+
+	fmt.Println("Merchant exchange rate updated succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
