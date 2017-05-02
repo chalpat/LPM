@@ -408,17 +408,17 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 			if valIndex.TransactionFrom == merchantName{
 				fmt.Println("Customer's merchant found for CustomerOnBoarding")
 				jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-				fmt.Println("jsonResp inside if")
+				fmt.Println("jsonResp inside if for CustomerOnBoarding")
 				fmt.Println(jsonResp)
-				fmt.Println("transactionIndex::")
+				fmt.Println("transactionIndex for CustomerOnBoarding::")
 				fmt.Println(transactionIndex)
-				fmt.Println("length::")
+				fmt.Println("length for CustomerOnBoarding::")
 				fmt.Println(len(transactionIndex))
 				if i < len(transactionIndex)-1 {
-					fmt.Println("i::")
+					fmt.Println("i for CustomerOnBoarding::")
 					fmt.Println(i)
 					jsonResp = jsonResp + ","
-					fmt.Println("jsonResp inside if if")
+					fmt.Println("jsonResp inside if if for CustomerOnBoarding")
 					fmt.Println(jsonResp)
 				}
 			}
