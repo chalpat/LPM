@@ -368,7 +368,6 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 	var transactionIndex []string
 	var valIndex Transaction
 	var merchantName string
-	var transactionTypeCustomerOnBoarding string
 	var err error
 	fmt.Println("start getActivityHistoryForMerchant")
 	
@@ -390,7 +389,6 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 	}
 	json.Unmarshal(transactionAsBytes, &transactionIndex)								//un stringify it aka JSON.parse()
 	jsonResp = "{"
-	transactionTypeCustomerOnBoarding = "CustomerOnBoarding"
 	for i,val := range transactionIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getActivityHistoryForMerchant")
 		valueAsBytes, err := stub.GetState(val)
@@ -403,27 +401,8 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-
-		if valIndex.TransactionType == transactionTypeCustomerOnBoarding{
-			if valIndex.TransactionFrom == merchantName{
-				fmt.Println("Customer's merchant found for CustomerOnBoarding")
-				jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
-				fmt.Println("jsonResp inside if")
-				fmt.Println(jsonResp)
-				fmt.Println("transactionIndex::")
-				fmt.Println(transactionIndex)
-				fmt.Println("length::")
-				fmt.Println(len(transactionIndex))
-				if i < len(transactionIndex)-1 {
-					fmt.Println("i::")
-					fmt.Println(i)
-					jsonResp = jsonResp + ","
-					fmt.Println("jsonResp inside if if")
-					fmt.Println(jsonResp)
-				}
-			}
-		} else if valIndex.TransactionTo == merchantName{
-			fmt.Println("Customer's merchant found for other transactions")
+		if valIndex.TransactionFrom == merchantName{
+			fmt.Println("Customer's merchant found")
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
@@ -438,7 +417,7 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 				fmt.Println("jsonResp inside if if")
 				fmt.Println(jsonResp)
 			}
-		}
+		} 
 	}
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
@@ -1150,21 +1129,21 @@ func (t *ManageLPM) updateCustomerAccumulation(stub shim.ChaincodeStubInterface,
 	}
 	res := Customer{}
 	res_trans := Transaction{}
- 	transactionId := args[4]
+ 	transactionId := args[1]
 	json.Unmarshal(customerAsBytes, &res)
 	if res.CustomerID == customerId{
 		fmt.Println("Customer found with customerId : " + customerId)
 		fmt.Println(res);
-		res.WalletWorth = args[1]
-		res.MerchantsPointsCount = args[2]
-		res.MerchantsPointsWorth = args[3]
+		//res.WalletWorth = args[1]
+		//res.MerchantsPointsCount = args[2]
+		//res.MerchantsPointsWorth = args[3]
 		res_trans.TransactionID = transactionId
- 		res_trans.TransactionDateTime = args[5]
- 		res_trans.TransactionType = args[6]
- 		res_trans.TransactionFrom = args[7]
- 		res_trans.TransactionTo = args[8]
- 		res_trans.Credit = args[9]
- 		res_trans.Debit = args[10]
+ 		res_trans.TransactionDateTime = args[2]
+ 		res_trans.TransactionType = args[3]
+ 		res_trans.TransactionFrom = args[4]
+ 		res_trans.TransactionTo = args[5]
+ 		//res_trans.Credit = args[9]
+ 		//res_trans.Debit = args[10]
  		res_trans.CustomerID = customerId
 	}else{
 		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
