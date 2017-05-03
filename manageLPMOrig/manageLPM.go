@@ -1869,7 +1869,12 @@ func (t *ManageLPM) updateMerchantsPurchaseBal(stub shim.ChaincodeStubInterface,
 		fmt.Println("Merchant found with merchantId : " + merchantId)
 		fmt.Println("Merchants old purchaseBalance : " + res.PurchaseBalance)
 		fmt.Println("Merchants new purchaseBalance : " + newPurchaseBal)
-		res.PurchaseBalance += newPurchaseBal 
+
+		currentPurchaseBalanceFloat, _ := strconv.ParseFloat(res.PurchaseBalance, 64)
+		newPurchaseBalFloat, _ := strconv.ParseFloat(newPurchaseBal, 64) 
+		purchaseBalanceCalculated := currentPurchaseBalanceFloat + newPurchaseBalFloat
+
+		res.PurchaseBalance = strconv.FormatFloat(purchaseBalanceCalculated, 'f', 2, 64)
 		res.MerchantCU_date = args[2]
 	}else{
 		errMsg := "{ \"message\" : \""+ merchantId+ " Not Found.\", \"code\" : \"503\"}"
