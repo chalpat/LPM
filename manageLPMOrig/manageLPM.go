@@ -1391,6 +1391,8 @@ func (t *ManageLPM) updateCustomerPurchase(stub shim.ChaincodeStubInterface, arg
   	}
 
 	// update the Merchant START
+	fmt.Println("res_Merchant.MerchantID in updateCustomerPurchase::"+res_Merchant.MerchantID)
+	fmt.Println("res_Merchant.PurchaseBalance in updateCustomerPurchase::"+res_Merchant.PurchaseBalance)
 	merchant_args := []string{res_Merchant.MerchantID, res_Merchant.PurchaseBalance, res_Merchant.MerchantCU_date}
 	t.updateMerchantsPurchaseBal(stub, merchant_args)
  	// update the Merchant END
