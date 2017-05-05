@@ -2293,7 +2293,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		`"merchantsPointsCount": "` + merchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  merchantsPointsWorth + `" `+ 
 	`}`
-	fmt.Println("customer_json: " + customer_json)
+	fmt.Println("customer_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + customer_json)
 	fmt.Print("customer_json in bytes array: ")
 	fmt.Println([]byte(customer_json))
 	err = stub.PutState(customerId, []byte(customer_json))									//store Customer with customerId as key
@@ -2312,6 +2312,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		`"debit": "` + res_trans.Debit + `" , `+ 
 		`"customerId": "` +  res_trans.CustomerID + `" `+ 
 	`}`
+	fmt.Println("transaction_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + transaction_json)
 	err = stub.PutState(res_trans.TransactionID, []byte(transaction_json))					//store Transaction with id as key
 	if err != nil {
 		return nil, err
