@@ -1838,7 +1838,7 @@ func (t *ManageLPM) updateMerchant(stub shim.ChaincodeStubInterface, args []stri
 	return nil, nil
 }
 // ============================================================================================================================
-// Write - update merchant's purchase balance into chaincode state
+// Write - update merchant's purchase balance into chaincode state -- Internal Function
 // ============================================================================================================================
 func (t *ManageLPM) updateMerchantsPurchaseBal(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
@@ -1853,7 +1853,9 @@ func (t *ManageLPM) updateMerchantsPurchaseBal(stub shim.ChaincodeStubInterface,
 	}
 	// set merchantId
 	merchantId := args[0]
+	fmt.Println("merchantId in updateMerchantsPurchaseBal: " + merchantId)
 	newPurchaseBal := args[1]
+	fmt.Println("newPurchaseBal in updateMerchantsPurchaseBal : " + newPurchaseBal)
 	merchantAsBytes, err := stub.GetState(merchantId)									//get the Merchant for the specified merchant from chaincode state
 	if err != nil {
 		errMsg := "{ \"message\" : \"Failed to get state for " + merchantId + "\", \"code\" : \"503\"}"
