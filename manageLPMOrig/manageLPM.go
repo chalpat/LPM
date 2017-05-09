@@ -1086,8 +1086,8 @@ func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []stri
 		`"transactionType": "` + transactionType + `" , `+
 		`"transactionFrom": "` + merchantName + `" , `+ 
 		`"transactionTo": "` + userName + `" , `+ 
-		`"credit": "` + walletWorth + `" , `+ 
-		`"debit": "` + "0" + `" , `+ 
+		`"credit": "` + merchantsPointsCount + `" , `+ 
+		`"debit": "` + "0.00" + `" , `+ 
 		`"customerId": "` +  customerId + `" `+ 
 	`}`
 	err = stub.PutState(transactionID, []byte(transaction_json))					//store Transaction with id as key
@@ -2272,7 +2272,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
  		res_trans.TransactionTo = res.UserName
  		//res_trans.Credit = strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
  		res_trans.Credit = strconv.FormatFloat(floatStartingBalance, 'f', 2, 64)
- 		res_trans.Debit = "0"
+ 		res_trans.Debit = "0.00"
  		res_trans.CustomerID = customerId
 	}else{
 		errMsg := "{ \"message\" : \""+ customerId+ " Not Found.\", \"code\" : \"503\"}"
