@@ -31,10 +31,10 @@ import (
 type ManageLPM struct {
 }
 
-var CustomerIndexStr = "_Customerindex"				// name for the key/value that will store a list of all known Customer
-var TransactionIndexStr = "_Transactionindex"		// name for the key/value that will store a list of all known Transaction
+var CustomerIndexStr = "_Customerindex"				//name for the key/value that will store a list of all known Customer
+var TransactionIndexStr = "_Transactionindex"		//name for the key/value that will store a list of all known Transaction
 var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will store a list of all known Merchant
-var OwnerIndexStr = "_Ownerindex"				//name for the key/value that will store a list of all known Owner
+var OwnerIndexStr = "_Ownerindex"					//name for the key/value that will store a list of all known Owner
 
 type Customer struct{							// Attributes of a Customer 
 	CustomerID string `json:"customerId"`					
@@ -145,31 +145,31 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 	fmt.Println("invoke is running " + function)
 
 	// Handle different functions
-	if function == "init" {													//initialize the chaincode state, used as reset
+	if function == "init" {									//initialize the chaincode state, used as reset
 		return t.Init(stub, "init", args)
-	} else if function == "createCustomer" {								//create a new Customer
+	} else if function == "createCustomer" {				//create a new Customer
 		return t.createCustomer(stub, args)
-	}else if function == "updateCustomerAccumulation" {						//update a Customer - Add points
+	}else if function == "updateCustomerAccumulation" {		//update a Customer - Add points
 		return t.updateCustomerAccumulation(stub, args)
-	}else if function == "updateCustomerPurchase" {							//update a Customer - Purchase
+	}else if function == "updateCustomerPurchase" {			//update a Customer - Purchase
 		return t.updateCustomerPurchase(stub, args)
-	}else if function == "updateCustomerTransfer" {							//update a Customer - Transfer
+	}else if function == "updateCustomerTransfer" {			//update a Customer - Transfer
 		return t.updateCustomerTransfer(stub, args)
-	}else if function == "deleteCustomer" {									//delete a Customer
+	}else if function == "deleteCustomer" {					//delete a Customer
 		return t.deleteCustomer(stub, args)
-	}else if function == "createMerchant" {									//create a new Merchant
+	}else if function == "createMerchant" {					//create a new Merchant
 		return t.createMerchant(stub, args)
-	}else if function == "updateMerchant" {									//update a Merchant
+	}else if function == "updateMerchant" {					//update a Merchant
 		return t.updateMerchant(stub, args)
-	}else if function == "deleteMerchant" {									//delete a Merchant
+	}else if function == "deleteMerchant" {					//delete a Merchant
 		return t.deleteMerchant(stub, args)
-	}else if function == "createOwner" {									//create a owner
+	}else if function == "createOwner" {					//create a owner
 		return t.createOwner(stub, args)
-	}else if function == "updateMerchantsPPDS" {							//update a Merchant's PPDS
+	}else if function == "updateMerchantsPPDS" {			//update a Merchant's PPDS
 		return t.updateMerchantsPPDS(stub, args)
-	}else if function == "associateCustomer" {								//associate a customer to Merchant
+	}else if function == "associateCustomer" {				//associate a customer to Merchant
 		return t.associateCustomer(stub, args)
-	}else if function == "updateMerchantsExchangeRate" {					//update a Merchant's Exchange Rate
+	}else if function == "updateMerchantsExchangeRate" {	//update a Merchant's Exchange Rate
 		return t.updateMerchantsExchangeRate(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)
@@ -187,38 +187,38 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 	fmt.Println("query is running " + function)
 
 	// Handle different functions
-	if function == "getCustomerByID" {													//Read a Customer by Id
+	if function == "getCustomerByID" {						//Read a Customer by Id
 		return t.getCustomerByID(stub, args)
-	}else if function == "getCustomerDetailsByID" {										//Read Customer Details by Id 
+	}else if function == "getCustomerDetailsByID" {			//Read Customer Details by Id 
 		return t.getCustomerDetailsByID(stub, args)
-	}else if function == "getActivityHistory" {											//Read all transactions 
+	}else if function == "getActivityHistory" {				//Read all transactions 
 		return t.getActivityHistory(stub, args)
-	}else if function == "getActivityHistoryForMerchant" {								//Read all transactions 
+	}else if function == "getActivityHistoryForMerchant" {	//Read all transactions 
 		return t.getActivityHistoryForMerchant(stub, args)
-	}else if function == "getAllCustomers" {											//Read all Customers
+	}else if function == "getAllCustomers" {				//Read all Customers
 		return t.getAllCustomers(stub, args)
-	}else if function == "getCustomersByMerchantID" {									//Read a Customer by transId
+	}else if function == "getCustomersByMerchantID" {		//Read a Customer by transId
 		return t.getCustomersByMerchantID(stub, args)
-	}else if function == "getMerchantByName" {											//Read Merchant by Name
+	}else if function == "getMerchantByName" {				//Read Merchant by Name
 		return t.getMerchantByName(stub, args)
-	}else if function == "getMerchantByID" {											//Read Merchant by Id
+	}else if function == "getMerchantByID" {				//Read Merchant by Id
 		return t.getMerchantByID(stub, args)
-	}else if function == "getMerchantDetailsByID" {										//Read Merchant details by Id
+	}else if function == "getMerchantDetailsByID" {			//Read Merchant details by Id
 		return t.getMerchantDetailsByID(stub, args)
-	}else if function == "getMerchantsByIndustry" {										//Read all Merchants by Industry
+	}else if function == "getMerchantsByIndustry" {			//Read all Merchants by Industry
 		return t.getMerchantsByIndustry(stub, args)
-	}else if function == "getAllMerchants" {											//Read all Merchants
+	}else if function == "getAllMerchants" {				//Read all Merchants
 		return t.getAllMerchants(stub, args)
-	}else if function == "getMerchantsAccountBalance" {									//Read Merchant Account Balance
+	}else if function == "getMerchantsAccountBalance" {		//Read Merchant Account Balance
 		return t.getMerchantsAccountBalance(stub, args)
-	}else if function == "getMerchantsUserCount" {										//Read Merchant's User Count
+	}else if function == "getMerchantsUserCount" {			//Read Merchant's User Count
 		return t.getMerchantsUserCount(stub, args)
-	}else if function == "getOwnersMerchantUserCount" {									//Read Owner's Merchant and User Count
+	}else if function == "getOwnersMerchantUserCount" {		//Read Owner's Merchant and User Count
 		return t.getOwnersMerchantUserCount(stub, args)
-	}else if function == "getOwnerByID" {												//Read Owner by Id
+	}else if function == "getOwnerByID" {					//Read Owner by Id
 		return t.getOwnerByID(stub, args)
 	}
-	fmt.Println("query did not find func: " + function)						//error
+	fmt.Println("query did not find func: " + function)		//error
 	errMsg := "{ \"message\" : \"Received unknown function query\", \"code\" : \"503\"}"
 	err := stub.SetEvent("errEvent", []byte(errMsg))
 	if err != nil {
