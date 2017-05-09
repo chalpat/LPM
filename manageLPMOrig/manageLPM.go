@@ -149,11 +149,11 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.Init(stub, "init", args)
 	} else if function == "createCustomer" {								//create a new Customer
 		return t.createCustomer(stub, args)
-	}else if function == "updateCustomerAccumulation" {						//update a Customer
+	}else if function == "updateCustomerAccumulation" {						//update a Customer - Add points
 		return t.updateCustomerAccumulation(stub, args)
-	}else if function == "updateCustomerPurchase" {							//update a Customer
+	}else if function == "updateCustomerPurchase" {							//update a Customer - Purchase
 		return t.updateCustomerPurchase(stub, args)
-	}else if function == "updateCustomerTransfer" {							//update a Customer
+	}else if function == "updateCustomerTransfer" {							//update a Customer - Transfer
 		return t.updateCustomerTransfer(stub, args)
 	}else if function == "deleteCustomer" {									//delete a Customer
 		return t.deleteCustomer(stub, args)
@@ -189,7 +189,7 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 	// Handle different functions
 	if function == "getCustomerByID" {													//Read a Customer by Id
 		return t.getCustomerByID(stub, args)
-	}else if function == "getCustomerDetailsByID" {										//Read all transactions 
+	}else if function == "getCustomerDetailsByID" {										//Read Customer Details by Id 
 		return t.getCustomerDetailsByID(stub, args)
 	}else if function == "getActivityHistory" {											//Read all transactions 
 		return t.getActivityHistory(stub, args)
@@ -199,23 +199,23 @@ func (t *ManageLPM) Query(stub shim.ChaincodeStubInterface, function string, arg
 		return t.getAllCustomers(stub, args)
 	}else if function == "getCustomersByMerchantID" {									//Read a Customer by transId
 		return t.getCustomersByMerchantID(stub, args)
-	}else if function == "getMerchantByName" {											//Read all Merchants by Name
+	}else if function == "getMerchantByName" {											//Read Merchant by Name
 		return t.getMerchantByName(stub, args)
-	}else if function == "getMerchantByID" {											//Read all Merchants
+	}else if function == "getMerchantByID" {											//Read Merchant by Id
 		return t.getMerchantByID(stub, args)
-	}else if function == "getMerchantDetailsByID" {										//Read all Merchants
+	}else if function == "getMerchantDetailsByID" {										//Read Merchant details by Id
 		return t.getMerchantDetailsByID(stub, args)
-	}else if function == "getMerchantsByIndustry" {										//Read all Merchants
+	}else if function == "getMerchantsByIndustry" {										//Read all Merchants by Industry
 		return t.getMerchantsByIndustry(stub, args)
 	}else if function == "getAllMerchants" {											//Read all Merchants
 		return t.getAllMerchants(stub, args)
-	}else if function == "getMerchantsAccountBalance" {									//Read all Merchants
+	}else if function == "getMerchantsAccountBalance" {									//Read Merchant Account Balance
 		return t.getMerchantsAccountBalance(stub, args)
-	}else if function == "getMerchantsUserCount" {										//Read all Merchants
+	}else if function == "getMerchantsUserCount" {										//Read Merchant's User Count
 		return t.getMerchantsUserCount(stub, args)
-	}else if function == "getOwnersMerchantUserCount" {									//Read all Merchants
+	}else if function == "getOwnersMerchantUserCount" {									//Read Owner's Merchant and User Count
 		return t.getOwnersMerchantUserCount(stub, args)
-	}else if function == "getOwnerByID" {												//Read all Merchants
+	}else if function == "getOwnerByID" {												//Read Owner by Id
 		return t.getOwnerByID(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)						//error
@@ -1812,7 +1812,7 @@ func (t *ManageLPM) updateMerchant(stub shim.ChaincodeStubInterface, args []stri
 	
 	//build the Merchant json string manually
 	merchant := 	`{`+
-		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantId": "` + res.MerchantID + `" , `+
 		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
@@ -1889,7 +1889,7 @@ func (t *ManageLPM) updateMerchantsPurchaseBal(stub shim.ChaincodeStubInterface,
 	
 	//build the Merchant json string manually
 	merchant_json := 	`{`+
-		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantId": "` + res.MerchantID + `" , `+
 		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
@@ -1962,7 +1962,7 @@ func (t *ManageLPM) updateMerchantsPPDS(stub shim.ChaincodeStubInterface, args [
 	
 	//build the Merchant json string manually
 	merchant_json := 	`{`+
-		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantId": "` + res.MerchantID + `" , `+
 		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
@@ -2035,7 +2035,7 @@ func (t *ManageLPM) updateMerchantsExchangeRate(stub shim.ChaincodeStubInterface
 	
 	//build the Merchant json string manually
 	merchant_json := 	`{`+
-		`"merchantID": "` + res.MerchantID + `" , `+
+		`"merchantId": "` + res.MerchantID + `" , `+
 		`"merchantUserName": "` + res.MerchantUserName + `" , `+
 		`"merchantName": "` + res.MerchantName + `" , `+
 		`"merchantIndustry": "` + res.MerchantIndustry + `" , `+ 
