@@ -37,6 +37,7 @@ var MerchantIndexStr = "_Merchantindex"				//name for the key/value that will st
 var OwnerIndexStr = "_Ownerindex"					//name for the key/value that will store a list of all known Owner
 
 var MerchantInitialBalance = "10000.00"
+var StartingBalance = "100.00"
 
 type Customer struct{							// Attributes of a Customer 
 	CustomerID string `json:"customerId"`					
@@ -1028,6 +1029,48 @@ func (t *ManageLPM) createCustomer(stub shim.ChaincodeStubInterface, args []stri
  	transactionDateTime := args[11]
 	transactionType := args[12]
 
+	merchantAsBytes, err := stub.GetState(merchantID)
+	if err != nil {
+		return nil, errors.New("Failed to get Merchant merchantID")
+	}
+	res_Merchant := Merchant{}
+	json.Unmarshal(merchantAsBytes, &res_Merchant)
+	if res_Merchant.MerchantID == merchantID{
+		fmt.Println("Merchant found with merchantID in createCustomer: " + merchantID)
+		fmt.Println(res_Merchant);
+	}else{
+		errMsg := "{ \"message\" : \""+ merchantID+ " Not Found.\", \"code\" : \"503\"}"
+		err = stub.SetEvent("errEvent", []byte(errMsg))
+		if err != nil {
+			return nil, err
+		} 
+		return nil, nil
+	}
+	floatStartingBalance, _ := strconv.ParseFloat(StartingBalance, 64)
+	floatInitialBalance, _ := strconv.ParseFloat(res_Merchant.MerchantInitialBalance, 64) 
+	_merchantInitialBalance := floatInitialBalance - floatStartingBalance
+	//build the Merchant json string manually
+	merchant_json := 	`{`+
+		`"merchantId": "` + res_Merchant.MerchantID + `" , `+
+		`"merchantUserName": "` + res_Merchant.MerchantUserName + `" , `+
+		`"merchantName": "` + res_Merchant.MerchantName + `" , `+
+		`"merchantIndustry": "` + res_Merchant.MerchantIndustry + `" , `+
+		`"industryColor": "` + res_Merchant.IndustryColor + `" , `+
+		`"pointsPerDollarSpent": "` + res_Merchant.PointsPerDollarSpent + `" , `+ 
+		`"exchangeRate": "` + res_Merchant.ExchangeRate + `" , `+ 
+		`"purchaseBalance": "` + res_Merchant.PurchaseBalance + `" , `+
+		`"merchantCurrency": "` + res_Merchant.MerchantCurrency + `" , `+ 
+		`"merchantCU_date": "` + res_Merchant.MerchantCU_date + `" , `+ 
+		`"merchantInitialBalance": "` + strconv.FormatFloat(_merchantInitialBalance, 'f', 2, 64) + `" `+ 
+	`}`
+	fmt.Println("merchant_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + merchant_json)
+	fmt.Print("merchant_json in bytes array: ")
+	fmt.Println([]byte(merchant_json))
+	err = stub.PutState(merchantID, []byte(merchant_json))									//store Merchant with merchantId as key
+	if err != nil {
+		return nil, err
+	}
+
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
 		return nil, errors.New("Failed to get Customer customerID")
@@ -1717,6 +1760,7 @@ func (t *ManageLPM) createMerchant(stub shim.ChaincodeStubInterface, args []stri
 		} 
 		return nil, nil				//all stop a Merchant by this name exists
 	}
+	fmt.Println("MerchantInitialBalance::"+MerchantInitialBalance)
 	//build the Merchant json string manually
 	merchant_json := 	`{`+
 		`"merchantId": "` + merchantID + `" , `+
@@ -2212,8 +2256,8 @@ func (t *ManageLPM) createOwner(stub shim.ChaincodeStubInterface, args []string)
 func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var err error
 	var walletWorth, merchantIDs, merchantNames, merchantColors, merchantCurrencies, merchantsPointsCount, merchantsPointsWorth string
-	if len(args) != 6 {
-		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 6\", \"code\" : \"503\"}"
+	if len(args) != 5 {
+		errMsg := "{ \"message\" : \"Incorrect number of arguments. Expecting 5\", \"code\" : \"503\"}"
 		err = stub.SetEvent("errEvent", []byte(errMsg))
 		if err != nil {
 			return nil, err
@@ -2223,8 +2267,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	fmt.Println("start associateCustomer")
 	customerId := args[0]
 	merchantId := args[1]
-	startingBalance := args[2]
-	
+		
 	customerAsBytes, err := stub.GetState(customerId)
 	if err != nil {
 		return nil, errors.New("Failed to get Customer customerID")
@@ -2254,11 +2297,12 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 	}
 
 	// Calculation	
-	floatStartingBalance, _ := strconv.ParseFloat(startingBalance, 64)
+	floatStartingBalance, _ := strconv.ParseFloat(StartingBalance, 64)
 	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
 	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
 	floatInitialBalance, _ := strconv.ParseFloat(res_Merchant.MerchantInitialBalance, 64) 
 	_merchantInitialBalance := floatInitialBalance - floatStartingBalance
+	fmt.Println("_merchantInitialBalance in associateCustomer::"+strconv.FormatFloat(_merchantInitialBalance, 'f', 2, 64))
 	json.Unmarshal(customerAsBytes, &res)
 	floatWalletWorth, _ := strconv.ParseFloat(res.WalletWorth, 64)
 	newWalletWorth := floatWalletWorth + floatStartingBalance
@@ -2272,7 +2316,7 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		merchantColors = res.MerchantColors + "," + res_Merchant.IndustryColor
 		merchantCurrencies = res.MerchantCurrencies + "," + res_Merchant.MerchantCurrency
 		merchantsPointsCount = res.MerchantsPointsCount + "," + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
-		merchantsPointsWorth = res.MerchantsPointsWorth + "," + startingBalance
+		merchantsPointsWorth = res.MerchantsPointsWorth + "," + StartingBalance
 	
 		res_trans.TransactionID = args[3]
  		res_trans.TransactionDateTime = args[4]
