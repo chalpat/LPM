@@ -2325,9 +2325,9 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 		merchantsPointsCount = res.MerchantsPointsCount + "," + strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
 		merchantsPointsWorth = res.MerchantsPointsWorth + "," + StartingBalance
 	
-		res_trans.TransactionID = args[3]
- 		res_trans.TransactionDateTime = args[4]
- 		res_trans.TransactionType = args[5]
+		res_trans.TransactionID = args[2]
+ 		res_trans.TransactionDateTime = args[3]
+ 		res_trans.TransactionType = args[4]
  		res_trans.TransactionFrom = res_Merchant.MerchantName
  		res_trans.TransactionTo = res.UserName
  		//res_trans.Credit = strconv.FormatFloat(pointsToBeCredited, 'f', 2, 64)
