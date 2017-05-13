@@ -807,6 +807,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	fmt.Print("purchaseBalance for merchant : ")
 	fmt.Print(merchantIndex.PurchaseBalance)
 	accountBalanceMerchant, _ := strconv.ParseFloat(merchantIndex.PurchaseBalance, 64)
+	merchantInitialBalance, _ := strconv.ParseFloat(merchantIndex.MerchantInitialBalance, 64)
 	// Get Merchants Balance from Merchant Struct END
 
 	customerAsBytes, err := stub.GetState(CustomerIndexStr)
@@ -854,6 +855,12 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
     		accountBalance = accountBalance + accountBalanceMerchant
 		} 
 	}
+	accountBalance = accountBalance + merchantInitialBalance
+	merchantInitialBalanceVar, _ := strconv.ParseFloat(MerchantInitialBalance, 64)
+	amountFromCustomerOnBoarding :=  merchantInitialBalanceVar - merchantInitialBalance
+	fmt.Println("amountFromCustomerOnBoarding::")
+	fmt.Println(amountFromCustomerOnBoarding)
+	accountBalance = accountBalance - amountFromCustomerOnBoarding
 	jsonResp = jsonResp + "\"merchantAccountBalance\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
