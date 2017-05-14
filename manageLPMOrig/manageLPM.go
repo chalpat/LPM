@@ -309,6 +309,7 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 	var valIndex Transaction
 	var customerId string
 	var err error
+	var transactionTypeCustomerOnBoarding string
 	fmt.Println("start getActivityHistory")
 	
 	if len(args) != 1 {
@@ -319,9 +320,16 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 		} 
 		return nil, nil
 	}
+
 	// set customerId
 	customerId = args[0]
 	fmt.Println("customerId in getActivityHistory::" + customerId)
+	customerAsBytes, err := stub.GetState(customerId)
+	if err != nil {
+		return nil, errors.New("Failed to get Customer customerID")
+	}
+	res_Customer := Customer{}
+	json.Unmarshal(customerAsBytes, &res_Customer)
 		
 	transactionAsBytes, err := stub.GetState(TransactionIndexStr)
 	if err != nil {
@@ -329,6 +337,7 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 	}
 	json.Unmarshal(transactionAsBytes, &transactionIndex)								//un stringify it aka JSON.parse()
 	jsonResp = "{"
+	transactionTypeCustomerOnBoarding = "CustomerOnBoarding"
 	for i,val := range transactionIndex{
 		fmt.Println(strconv.Itoa(i) + " - looking at " + val + " for getActivityHistory")
 		valueAsBytes, err := stub.GetState(val)
@@ -341,8 +350,26 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 		json.Unmarshal(valueAsBytes, &valIndex)
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
-        if valIndex.CustomerID == customerId{
-			fmt.Println("Customer found")
+		if valIndex.TransactionType == transactionTypeCustomerOnBoarding{
+			if valIndex.CustomerID == customerId{
+				fmt.Println("Customer found for CustomerOnBoarding")
+				jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
+				fmt.Println("jsonResp inside if for CustomerOnBoarding")
+				fmt.Println(jsonResp)
+				fmt.Println("transactionIndex for CustomerOnBoarding::")
+				fmt.Println(transactionIndex)
+				fmt.Println("length for CustomerOnBoarding::")
+				fmt.Println(len(transactionIndex))
+				if i < len(transactionIndex)-1 {
+					fmt.Println("i for CustomerOnBoarding::")
+					fmt.Println(i)
+					jsonResp = jsonResp + ","
+					fmt.Println("jsonResp inside if if for CustomerOnBoarding")
+					fmt.Println(jsonResp)
+				}
+			}	
+		} else if valIndex.TransactionFrom == res_Customer.UserName{
+			fmt.Println("Customer found other than CustomerOnBoarding")
 			jsonResp = jsonResp + "\""+ val + "\":" + string(valueAsBytes[:])
 			fmt.Println("jsonResp inside if")
 			fmt.Println(jsonResp)
@@ -357,7 +384,7 @@ func (t *ManageLPM) getActivityHistory(stub shim.ChaincodeStubInterface, args []
 				fmt.Println("jsonResp inside if if")
 				fmt.Println(jsonResp)
 			}
-		} 
+        } 
 	}
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
