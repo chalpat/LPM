@@ -864,7 +864,7 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 		fmt.Print("valIndex: ")
 		fmt.Print(valIndex)
 		if strings.Contains(valIndex.MerchantIDs, merchantId){
-			fmt.Println("Merchant found")
+			fmt.Println("Merchant found for Customer::"+valIndex.CustomerID)
 
 			// find the index of the merchant to take the merchantPointsWorth in that index only
 			fmt.Println("valIndex.MerchantIDs::"+valIndex.MerchantIDs)
@@ -886,9 +886,13 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 	     		}
     		}
     		accountBalance = accountBalance + accountBalanceMerchant
+		fmt.Println("accountBalance1::")
+		fmt.Println(accountBalance)
 		} 
 	}
 	accountBalance = accountBalance + merchantInitialBalance
+	fmt.Println("accountBalance2::")
+	fmt.Println(accountBalance)
 	merchantInitialBalanceVar, _ := strconv.ParseFloat(MerchantInitialBalance, 64)
 	amountFromCustomerOnBoarding :=  merchantInitialBalanceVar - merchantInitialBalance
 	fmt.Println("amountFromCustomerOnBoarding::")
