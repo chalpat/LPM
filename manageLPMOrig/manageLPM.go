@@ -891,23 +891,27 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 					fmt.Println(accountBalance)			
 	     			}
     			}
-			fmt.Println("accountBalance3::")
+			/*fmt.Println("accountBalance3::")
 			fmt.Println(accountBalance)
 			fmt.Println("accountBalanceMerchant::")
 			fmt.Println(accountBalanceMerchant)
     			accountBalance = accountBalance + accountBalanceMerchant
 			fmt.Println("accountBalance4::")
-			fmt.Println(accountBalance)
+			fmt.Println(accountBalance)*/
 		} 
 	}
-	accountBalance = accountBalance + merchantInitialBalance
-	fmt.Println("accountBalance5::")
+	fmt.Println("accountBalance3::")
+	fmt.Println(accountBalance)
+	accountBalance = accountBalance + merchantInitialBalance + accountBalanceMerchant
+	fmt.Println("accountBalance4::")
 	fmt.Println(accountBalance)
 	merchantInitialBalanceVar, _ := strconv.ParseFloat(MerchantInitialBalance, 64)
 	amountFromCustomerOnBoarding :=  merchantInitialBalanceVar - merchantInitialBalance
 	fmt.Println("amountFromCustomerOnBoarding::")
 	fmt.Println(amountFromCustomerOnBoarding)
 	accountBalance = accountBalance - amountFromCustomerOnBoarding
+	fmt.Println("accountBalance5::")
+	fmt.Println(accountBalance)
 	jsonResp = jsonResp + "\"merchantAccountBalance\":" + strconv.FormatFloat(accountBalance, 'f', 2, 64)
 	jsonResp = jsonResp + "}"
 	if strings.Contains(jsonResp, "},}"){
