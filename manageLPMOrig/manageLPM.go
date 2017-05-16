@@ -153,12 +153,12 @@ func (t *ManageLPM) Invoke(stub shim.ChaincodeStubInterface, function string, ar
 		return t.Init(stub, "init", args)
 	} else if function == "createCustomer" {				//create a new Customer
 		return t.createCustomer(stub, args)
-	}else if function == "updateCustomerAccumulationSM" {		//update a Customer - Add points
-		return t.updateCustomerAccumulationSM(stub, args)
-	}else if function == "updateCustomerPurchaseSM" {			//update a Customer - Purchase
-		return t.updateCustomerPurchaseSM(stub, args)
-	}else if function == "updateCustomerTransferSM" {			//update a Customer - Transfer
-		return t.updateCustomerTransferSM(stub, args)
+	}else if function == "updateCustomerAccumulationSC" {		//update a Customer - Add points
+		return t.updateCustomerAccumulationSC(stub, args)
+	}else if function == "updateCustomerPurchaseSC" {			//update a Customer - Purchase
+		return t.updateCustomerPurchaseSC(stub, args)
+	}else if function == "updateCustomerTransferSC" {			//update a Customer - Transfer
+		return t.updateCustomerTransferSC(stub, args)
 	}else if function == "updateCustomerAccumulation" {		//update a Customer - Add points
 		return t.updateCustomerAccumulation(stub, args)
 	}else if function == "updateCustomerPurchase" {			//update a Customer - Purchase
@@ -1699,21 +1699,21 @@ func (t *ManageLPM) updateCustomerTransfer(stub shim.ChaincodeStubInterface, arg
 // ============================================================================================================================
 // Write - update customer during accumulation into chaincode state - SmartContracts
 // ============================================================================================================================
-func (t *ManageLPM) updateCustomerAccumulationSM(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageLPM) updateCustomerAccumulationSC(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	fmt.Println("Customer details updated succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
 // Write - update customer during redemption into chaincode state - SmartContracts
 // ============================================================================================================================
-func (t *ManageLPM) updateCustomerPurchaseSM(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageLPM) updateCustomerPurchaseSC(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	fmt.Println("Customer details updated succcessfully")
 	return nil, nil
 }
 // ============================================================================================================================
 // Write - update customer during transfer into chaincode state - SmartContracts
 // ============================================================================================================================
-func (t *ManageLPM) updateCustomerTransferSM(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func (t *ManageLPM) updateCustomerTransferSC(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	fmt.Println("Customer details updated succcessfully")
 	return nil, nil
 }
