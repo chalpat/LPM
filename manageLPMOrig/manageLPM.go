@@ -482,7 +482,7 @@ func (t *ManageLPM) getActivityHistoryForMerchant(stub shim.ChaincodeStubInterfa
 		fmt.Println("in if for jsonResp contains wrong json")	
 		jsonResp = strings.Replace(jsonResp, "},}", "}}", -1)
 	}
-	fmt.Println("jsonResp : " + jsonResp)
+	fmt.Println("final jsonResp in getActivityHistoryForMerchant: " + jsonResp)
 	fmt.Print("jsonResp in bytes : ")
 	fmt.Println([]byte(jsonResp))
 	fmt.Println("end getActivityHistoryForMerchant")
@@ -1403,6 +1403,7 @@ func (t *ManageLPM) updateCustomerPurchase(stub shim.ChaincodeStubInterface, arg
 		`"merchantsPointsCount": "` + res.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res.MerchantsPointsWorth + `" `+ 
 	`}`
+	fmt.Println("customer_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + customer_json)
 	err = stub.PutState(customerId, []byte(customer_json))							//store Customer with id as key
 	if err != nil {
 		return nil, err
@@ -1419,6 +1420,7 @@ func (t *ManageLPM) updateCustomerPurchase(stub shim.ChaincodeStubInterface, arg
  		`"debit": "` + res_trans1.Debit + `" , `+ 
  		`"customerId": "` +  res_trans1.CustomerID + `" `+ 
     `}`
+	fmt.Println("transaction_json1:::::::::::::::::::::::::::::::::::::::::::::::::::: " + transaction_json1)
 	err = stub.PutState(transactionId1, []byte(transaction_json1))					//store Transaction with id as key
 	if err != nil {
 		return nil, err
@@ -1454,6 +1456,7 @@ func (t *ManageLPM) updateCustomerPurchase(stub shim.ChaincodeStubInterface, arg
  		`"debit": "` + res_trans2.Debit + `" , `+ 
  		`"customerId": "` +  res_trans2.CustomerID + `" `+ 
  	`}`
+	fmt.Println("transaction_json2:::::::::::::::::::::::::::::::::::::::::::::::::::: " + transaction_json2)
  	err = stub.PutState(transactionId2, []byte(transaction_json2))					//store Transaction with id as key
  	if err != nil {
  		return nil, err
@@ -1596,6 +1599,7 @@ func (t *ManageLPM) updateCustomerTransfer(stub shim.ChaincodeStubInterface, arg
 		`"merchantsPointsCount": "` + res1.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res1.MerchantsPointsWorth + `" `+ 
 	`}`
+	fmt.Println("customer1_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + customer1_json)
 	err = stub.PutState(customerId1, []byte(customer1_json))							//store Customer with id as key
 	if err != nil {
 		return nil, err
@@ -1614,6 +1618,7 @@ func (t *ManageLPM) updateCustomerTransfer(stub shim.ChaincodeStubInterface, arg
 		`"merchantsPointsCount": "` + res2.MerchantsPointsCount + `" , `+ 
 		`"merchantsPointsWorth": "` +  res2.MerchantsPointsWorth + `" `+ 
 	`}`
+	fmt.Println("customer2_json:::::::::::::::::::::::::::::::::::::::::::::::::::: " + customer2_json)
 	err = stub.PutState(customerId2, []byte(customer2_json))							//store Customer with id as key
 	if err != nil {
 		return nil, err
@@ -1630,6 +1635,7 @@ func (t *ManageLPM) updateCustomerTransfer(stub shim.ChaincodeStubInterface, arg
  		`"debit": "` + res_trans1.Debit + `" , `+ 
  		`"customerId": "` +  res_trans1.CustomerID + `" `+ 
     `}`
+	fmt.Println("transaction_json1:::::::::::::::::::::::::::::::::::::::::::::::::::: " + transaction_json1)
 	err = stub.PutState(transactionId1, []byte(transaction_json1))					//store Transaction with id as key
 	if err != nil {
 		return nil, err
@@ -1665,6 +1671,7 @@ func (t *ManageLPM) updateCustomerTransfer(stub shim.ChaincodeStubInterface, arg
  		`"debit": "` + res_trans2.Debit + `" , `+ 
  		`"customerId": "` +  res_trans2.CustomerID + `" `+ 
  	`}`
+	fmt.Println("transaction_json2:::::::::::::::::::::::::::::::::::::::::::::::::::: " + transaction_json2)
  	err = stub.PutState(transactionId2, []byte(transaction_json2))					//store Transaction with id as key
  	if err != nil {
  		return nil, err
