@@ -882,16 +882,26 @@ func (t *ManageLPM) getMerchantsAccountBalance(stub shim.ChaincodeStubInterface,
 				if merchantIndexForPointsWorth == k{
 					fmt.Println(strconv.Itoa(k) + " - looking at " + val + " for balance")
 					valToBeAdded, _ := strconv.ParseFloat(val, 64)
-	     		    accountBalance = accountBalance + valToBeAdded
-	     		}
-    		}
-    		accountBalance = accountBalance + accountBalanceMerchant
-		fmt.Println("accountBalance1::")
-		fmt.Println(accountBalance)
+					fmt.Println("accountBalance1::")
+					fmt.Println(accountBalance)			
+					fmt.Println("valToBeAdded::")
+					fmt.Println(valToBeAdded)
+	     		    		accountBalance = accountBalance + valToBeAdded
+					fmt.Println("accountBalance2::")
+					fmt.Println(accountBalance)			
+	     			}
+    			}
+			fmt.Println("accountBalance3::")
+			fmt.Println(accountBalance)
+			fmt.Println("accountBalanceMerchant::")
+			fmt.Println(accountBalanceMerchant)
+    			accountBalance = accountBalance + accountBalanceMerchant
+			fmt.Println("accountBalance4::")
+			fmt.Println(accountBalance)
 		} 
 	}
 	accountBalance = accountBalance + merchantInitialBalance
-	fmt.Println("accountBalance2::")
+	fmt.Println("accountBalance5::")
 	fmt.Println(accountBalance)
 	merchantInitialBalanceVar, _ := strconv.ParseFloat(MerchantInitialBalance, 64)
 	amountFromCustomerOnBoarding :=  merchantInitialBalanceVar - merchantInitialBalance
