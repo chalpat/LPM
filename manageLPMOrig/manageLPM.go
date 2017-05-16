@@ -2380,8 +2380,8 @@ func (t *ManageLPM) associateCustomer(stub shim.ChaincodeStubInterface, args []s
 
 	// Calculation	
 	floatStartingBalance, _ := strconv.ParseFloat(StartingBalance, 64)
-	floatPointsPerDollarSpent, _ := strconv.ParseFloat(res_Merchant.PointsPerDollarSpent, 64)
-	pointsToBeCredited := floatStartingBalance / floatPointsPerDollarSpent
+	floatExchangeRate, _ := strconv.ParseFloat(res_Merchant.ExchangeRate, 64)
+	pointsToBeCredited := floatStartingBalance / floatExchangeRate
 	floatInitialBalance, _ := strconv.ParseFloat(res_Merchant.MerchantInitialBalance, 64) 
 	_merchantInitialBalance := floatInitialBalance - floatStartingBalance
 	fmt.Println("_merchantInitialBalance in associateCustomer::"+strconv.FormatFloat(_merchantInitialBalance, 'f', 2, 64))
